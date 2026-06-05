@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fawaky Naturals | Ice Apple Juice</title>
+  <meta name="description" content="Fawaky Naturals Ice Apple Juice — 100% natural, tropical palm fruit hydration in a can.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Syne:wght@600;700;800&family=Cormorant+Garant:wght@600;700;800&family=Plus+Jakarta+Sans:wght@700;800&family=Manrope:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+  <!-- Preloader -->
+  <div id="preloader" class="preloader">
+    <div class="preloader-content">
+      <div class="preloader-logo">fawaky.</div>
+      <div class="preloader-bar">
+        <div id="preloader-progress" class="preloader-fill"></div>
+      </div>
+      <span id="preloader-percentage" class="preloader-pct">0%</span>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <header class="site-header" id="site-header">
+    <a href="#" class="logo">Fawaky Naturals</a>
+    <nav>
+      <a href="#">Our Story</a>
+      <a href="#flavors" class="nav-active">Flavors</a>
+      <a href="#benefits">Benefits</a>
+      <a href="#">Gallery</a>
+      <a href="#">FAQ</a>
+    </nav>
+    <button class="btn-buy">Buy Now</button>
+    <button class="btn-menu" id="btn-menu" aria-label="Open menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="mobile-nav" id="mobile-nav">
+      <a href="#">Our Story</a>
+      <a href="#flavors" class="nav-active">Flavors</a>
+      <a href="#benefits">Benefits</a>
+      <a href="#">Gallery</a>
+      <a href="#">FAQ</a>
+      <button class="btn-buy">Buy Now</button>
+    </div>
+  </header>
+
+  <!-- Scroll Animation -->
+  <main class="scroll-container" id="scroll-container">
+    <div class="canvas-wrapper">
+      <canvas id="animation-canvas"></canvas>
+    </div>
+  </main>
+
+  <!-- Below-fold light sections -->
+  <div class="light-sections">
+
+    <!-- Product Intro -->
+    <section class="ls-section ls-product-intro">
+      <div class="ls-product-intro-inner">
+        <h2 class="ls-heading" style="text-align:center;">Pure Ice Apple Magic</h2>
+        <p class="ls-subtext ls-subtext-center">Experience the raw, untamed refreshment of nature's best-kept secret. Crafted with real Nungu for an undeniably creamy, chilling sensation.</p>
+        <div class="ls-can-wrap">
+          <img src="/assets/0877bdbc-dd73-4b40-8724-a7de28cd0f7d.png" alt="Fawaky Ice Apple Juice can" class="ls-can-img">
+        </div>
+      </div>
+    </section>
+
+    <!-- Flavors Grid -->
+    <section class="ls-section ls-flavors" id="flavors">
+      <div class="ls-inner">
+        <div class="ls-section-head">
+          <h2 class="ls-heading">Choose Your Refreshment</h2>
+          <p class="ls-subtext">Discover our range of exotic, natural blends.</p>
+        </div>
+        <div class="ls-card-grid">
+          <!-- Card 1 -->
+          <div class="ls-card">
+            <div class="ls-card-badge ls-badge-new">New</div>
+            <img src="/assets/give_me_different_flavours_like_202606051453.jpeg" alt="Classic Fruits flavour cans" class="ls-card-img">
+            <h3 class="ls-card-title">Classic Fruits</h3>
+            <p class="ls-card-desc">Timeless refreshment with a Fawaky twist.</p>
+          </div>
+          <!-- Card 2 -->
+          <div class="ls-card">
+            <div class="ls-card-badge ls-badge-sig">Signature</div>
+            <img src="/assets/give_me_different_flavours_like_202606051453 (1).jpeg" alt="Ice Apple Series cans" class="ls-card-img">
+            <h3 class="ls-card-title">Ice Apple Series</h3>
+            <p class="ls-card-desc">The creamy, chilling essence of real Nungu.</p>
+          </div>
+          <!-- Card 3 -->
+          <div class="ls-card">
+            <img src="/assets/give_me_different_flavours_like_202606051453 (2).jpeg" alt="Exotic Blends cans" class="ls-card-img">
+            <h3 class="ls-card-title">Exotic Blends</h3>
+            <p class="ls-card-desc">Bold pairings for the adventurous palate.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Benefits Bento -->
+    <section class="ls-section ls-benefits" id="benefits">
+      <div class="ls-inner">
+        <div class="ls-benefits-head">
+          <h2 class="ls-heading">Nature in a Can</h2>
+          <p class="ls-subtext">We believe in transparent ingredients and unparalleled taste. No compromises.</p>
+        </div>
+        <div class="ls-bento">
+          <!-- Tile 1 — wide -->
+          <div class="ls-tile ls-tile-wide ls-tile-light">
+            <div class="ls-tile-icon ls-icon-green">
+              <span class="material-symbols-outlined" aria-hidden="true" style="font-variation-settings:'FILL' 1;">eco</span>
+            </div>
+            <h3 class="ls-tile-title">Real Nungu Pulp</h3>
+            <p class="ls-tile-desc">Experience the authentic texture and cooling properties of hand-harvested Ice Apple.</p>
+          </div>
+          <!-- Tile 2 — dark -->
+          <div class="ls-tile ls-tile-dark">
+            <span class="material-symbols-outlined ls-tile-icon-lg" aria-hidden="true" style="font-variation-settings:'FILL' 1;">water_drop</span>
+            <h3 class="ls-tile-title">100% Hydrating</h3>
+            <p class="ls-tile-desc">Naturally rich in electrolytes for optimal refreshment.</p>
+          </div>
+          <!-- Tile 3 -->
+          <div class="ls-tile ls-tile-light">
+            <span class="material-symbols-outlined ls-tile-icon-lg ls-icon-orange" aria-hidden="true" style="font-variation-settings:'FILL' 1;">block</span>
+            <h3 class="ls-tile-title">Zero Preservatives</h3>
+            <p class="ls-tile-desc">Clean label, always. Just the good stuff.</p>
+          </div>
+          <!-- Tile 4 — wide -->
+          <div class="ls-tile ls-tile-wide ls-tile-light">
+            <div class="ls-tile-icon ls-icon-purple">
+              <span class="material-symbols-outlined" aria-hidden="true" style="font-variation-settings:'FILL' 1;">bolt</span>
+            </div>
+            <h3 class="ls-tile-title">Raw Energy</h3>
+            <p class="ls-tile-desc">A natural boost from nature's purest ingredients.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="ls-footer">
+      <div class="ls-footer-inner">
+        <div class="ls-footer-brand">Fawaky Naturals</div>
+        <nav class="ls-footer-links">
+          <a href="#">Privacy Policy</a>
+          <a href="#">Terms of Service</a>
+          <a href="#">Shipping Info</a>
+          <a href="#">Contact Us</a>
+        </nav>
+        <p class="ls-footer-copy">© 2024 Fawaky Naturals. Refreshment reimagined.</p>
+      </div>
+    </footer>
+
+  </div><!-- end .light-sections -->
+
+  <script type="module" src="/main.js"></script>
+</body>
+</html>
