@@ -75,6 +75,12 @@ function initTilt() {
     el.classList.add('tilt-3d');
     tilt(el);
   });
+  // Story card: tilt the INNER wrapper so it composes with (never overwrites)
+  // the GSAP-scrubbed transform on the outer .sty-card.
+  document.querySelectorAll('.sty-card-inner').forEach((el) => {
+    el.classList.add('tilt-3d');
+    tilt(el, 5);
+  });
 }
 
 /* §5 Clean-label marquee ───────────────────────────────────── */
@@ -86,7 +92,9 @@ function initMarquee() {
 
 /* §6 Stat count-up (real numbers only) ─────────────────────── */
 function initCounters() {
-  document.querySelectorAll('[data-count]').forEach((el) => {
+  // Exclude #story stats — those are driven by the scrub timeline in initStory(),
+  // not inView (the pinned panel is always "in view").
+  document.querySelectorAll('[data-count]:not(.sty-stat-num):not(.sty-mix-val)').forEach((el) => {
     const target = parseFloat(el.dataset.count);
     if (Number.isNaN(target)) return;
     let done = false;

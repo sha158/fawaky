@@ -21,8 +21,22 @@ const DEFAULT_MAX_W = 1400;
 const MAX_WIDTH = {
   '0877bdbc-dd73-4b40-8724-a7de28cd0f7d.png': 1600, // hero can (LCP)
   '03ba4d14-eb39-468c-ab8a-725a46e096a8.png': 1600, // product-hero bg + social
-  '6e99ca7a-fbb6-477a-82b4-0068844efb2a.png': 1600, // seasonal bg + social
+  '6e99ca7a-fbb6-477a-82b4-0068844efb2a.png': 1600, // seasonal bg + social + reels poster
   '4c89619e-9937-463a-afef-5cbf7f083339.png': 1400, // bestseller spotlight
+  '5ab237ed-f3c6-4fef-9659-9df92f358054.png': 1400, // featured showcase centerpiece + reels
+  '47ba710b-a1e7-499c-b20c-2ecb95286aa8.png': 1400, // seasonal visual + reels poster
+  '67b3ae11-2d90-4e86-8527-d7f2f6373837.png': 1200, // frost/ice texture (showcase, wholesale)
+  'df010659-d1be-4823-9680-d7c3e138cf5f.png': 1400, // ingredients + showcase nungu float
+  '8475ba77-c5c8-4bea-b38f-e121544ca16d.png': 1400, // ingredients + showcase nata float
+  'ice-apple-hero.jpeg': 1400, // benefits hero band (ice apple)
+  'mostly-water.jpeg': 1400, // benefits bento big tile (hydration)
+  'bestseller-can.jpeg': 1400, // bestseller spotlight
+  'about-can.jpeg': 1400, // about / our story
+  'showcase-can.jpeg': 1400, // showcase / freshly chilled
+  'social-violet.jpeg': 900, // social grid tile (extra)
+  'cashew-splash.jpeg': 1000, // benefits support card (cashew)
+  'dryfruit-mix.jpeg': 1000, // benefits support card (dry fruits)
+  'milk-splash.jpeg': 1000, // benefits support card (milk)
   'give_me_different_flavours_like_202606051453.jpeg': 900,
   'give_me_different_flavours_like_202606051453 (1).jpeg': 900,
   'give_me_different_flavours_like_202606051453 (2).jpeg': 900,
