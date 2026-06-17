@@ -2965,14 +2965,13 @@ button:focus-visible,
   gap: 16px;
 }
 .ls-ingr-hl-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  display: flex;
+  justify-content: center;
   gap: 24px;
-  max-width: 860px;
-  margin: 0 auto;
 }
-@media (max-width: 640px) {
-  .ls-ingr-hl-grid { grid-template-columns: 1fr; max-width: 420px; }
+.ls-ingr-hl-grid .ls-ingr-tile {
+  max-width: 420px;
+  width: 100%;
 }
 
 /* ============================================================
