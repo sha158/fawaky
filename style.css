@@ -156,14 +156,17 @@ a {
 }
 
 .logo {
-  font-family: var(--font-body);
-  font-size: var(--fs-3xl);
-  font-weight: 800;
-  letter-spacing: -0.3px;
-  color: #ffffff;
+  display: flex;
+  align-items: center;
   cursor: pointer;
   text-decoration: none;
   flex-shrink: 0;
+}
+
+.logo-img {
+  display: block;
+  height: 44px;
+  width: auto;
 }
 
 .site-header nav {
@@ -2337,7 +2340,19 @@ button:focus-visible,
   .ls-why-grid { grid-template-columns: repeat(2, 1fr); }
 }
 @media (max-width: 768px) {
-  .ls-sticky-cta { display: flex; }
+  /* shown on mobile, but hidden until the user reaches the ending stretch (JS toggles .is-revealed) */
+  .ls-sticky-cta {
+    display: flex;
+    opacity: 0;
+    transform: translateY(160%);
+    pointer-events: none;
+    transition: opacity 0.35s ease, transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .ls-sticky-cta.is-revealed {
+    opacity: 1;
+    transform: none;
+    pointer-events: auto;
+  }
   .ls-footer-inner { padding-bottom: 112px; }
 
   .ls-showcase-stage { grid-template-columns: 1fr; gap: 36px; }
@@ -2790,6 +2805,7 @@ button:focus-visible,
    ============================================================ */
 @media (max-width: 768px) {
   .logo { padding: 8px 0; }
+  .logo-img { height: 34px; }
   .ls-btn-whatsapp,
   .ls-btn-outline,
   .ls-btn-instagram,
@@ -2847,4 +2863,156 @@ button:focus-visible,
   .sty-card  { transform: none !important; }
   .sty-mix-fill { width: var(--pct, 0%) !important; }
   .sty-nutri-layout { flex-direction: column !important; }
+}
+
+/* ============================================================
+   BENEFITS STRIP
+   ============================================================ */
+.ls-benefits-strip {
+  padding: 32px 0;
+  background: var(--ls-surface);
+  border-bottom: 1px solid var(--fw-card-bd);
+}
+.ls-badge-row {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.ls-benefit-badge {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--fw-card-bg);
+  backdrop-filter: blur(var(--fw-card-blur));
+  -webkit-backdrop-filter: blur(var(--fw-card-blur));
+  border: 1px solid var(--fw-card-bd);
+  border-radius: 9999px;
+  padding: 12px 22px;
+}
+.ls-benefit-badge-icon { font-size: 1.25rem; line-height: 1; }
+.ls-benefit-badge-label {
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  color: var(--ls-text);
+  letter-spacing: 0.01em;
+}
+@media (max-width: 600px) {
+  .ls-badge-row { gap: 10px; }
+  .ls-benefit-badge { padding: 10px 16px; }
+}
+
+/* ============================================================
+   WHY ICE APPLE SECTION
+   ============================================================ */
+.ls-why-ia { background: var(--ls-bg); }
+.ls-why-ia-hero {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  align-items: center;
+  margin-bottom: 60px;
+}
+.ls-why-ia-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.ls-why-ia-visual {
+  position: relative;
+  overflow: hidden;
+  border-radius: 24px;
+}
+.ls-why-ia-img {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 24px;
+  will-change: transform;
+}
+.ls-why-title {
+  font-family: var(--font-display);
+  font-size: var(--fs-md);
+  font-weight: 700;
+  color: var(--ls-text);
+  margin-bottom: 8px;
+}
+.ls-why-desc {
+  font-family: var(--font-body);
+  font-size: var(--fs-sm);
+  color: var(--ls-muted);
+  line-height: 1.6;
+}
+@media (max-width: 900px) {
+  .ls-why-ia-hero { grid-template-columns: 1fr; gap: 40px; }
+  .ls-why-ia-visual { max-width: 480px; margin: 0 auto; }
+}
+@media (max-width: 600px) {
+  .ls-why-ia-hero { margin-bottom: 40px; }
+}
+
+/* ============================================================
+   INGREDIENT HIGHLIGHTS
+   ============================================================ */
+.ls-ingr-hl { background: var(--ls-surface); }
+.ls-ingr-hl-header {
+  text-align: center;
+  margin-bottom: 48px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+.ls-ingr-hl-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+@media (max-width: 900px) {
+  .ls-ingr-hl-grid { grid-template-columns: 1fr; max-width: 420px; margin: 0 auto; }
+}
+
+/* ============================================================
+   TRUST SECTION
+   ============================================================ */
+.ls-trust {
+  background: var(--ls-primary-dark);
+  border-top: 1px solid var(--fw-card-bd);
+}
+.ls-trust-inner {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  align-items: center;
+}
+.ls-trust-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.ls-trust-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px 32px;
+}
+.ls-trust-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--ls-text);
+}
+.ls-trust-check {
+  color: var(--fw-green);
+  font-size: 1.1rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+@media (max-width: 768px) {
+  .ls-trust-inner { grid-template-columns: 1fr; gap: 40px; }
+  .ls-trust-list { grid-template-columns: 1fr; }
 }

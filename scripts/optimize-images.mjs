@@ -29,13 +29,12 @@ const MAX_WIDTH = {
   'df010659-d1be-4823-9680-d7c3e138cf5f.png': 1400, // ingredients + showcase nungu float
   '8475ba77-c5c8-4bea-b38f-e121544ca16d.png': 1400, // ingredients + showcase nata float
   'ice-apple-hero.jpeg': 1400, // benefits hero band (ice apple)
-  'mostly-water.jpeg': 1400, // benefits bento big tile (hydration)
   'bestseller-can.jpeg': 1400, // bestseller spotlight
   'about-can.jpeg': 1400, // about / our story
   'showcase-can.jpeg': 1400, // showcase / freshly chilled
   'social-violet.jpeg': 900, // social grid tile (extra)
   'cashew-splash.jpeg': 1000, // benefits support card (cashew)
-  'dryfruit-mix.jpeg': 1000, // benefits support card (dry fruits)
+  'tender-coconut-malai.jpeg': 1000, // benefits support card (tender coconut malai)
   'milk-splash.jpeg': 1000, // benefits support card (milk)
   'give_me_different_flavours_like_202606051453.jpeg': 900,
   'give_me_different_flavours_like_202606051453 (1).jpeg': 900,

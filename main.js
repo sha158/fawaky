@@ -416,6 +416,61 @@ function initAnimations() {
     });
   }
 
+  /* BENEFITS STRIP */
+  const benefitBadges = gsap.utils.toArray('.ls-benefit-badge');
+  if (benefitBadges.length) {
+    gsap.from(benefitBadges, {
+      scrollTrigger: { trigger: '.ls-benefits-strip', start: 'top 88%' },
+      y: 30, opacity: 0, duration: 0.6, stagger: 0.1, ease
+    });
+  }
+
+  /* WHY ICE APPLE */
+  const whyIaImg = document.querySelector('.ls-why-ia-img');
+  if (whyIaImg) {
+    gsap.fromTo(whyIaImg, { yPercent: -6 }, {
+      yPercent: 6, ease: 'none',
+      scrollTrigger: { trigger: '.ls-why-ia', start: 'top bottom', end: 'bottom top', scrub: 1.5 }
+    });
+    gsap.from('.ls-why-ia-copy > *', {
+      scrollTrigger: { trigger: '.ls-why-ia-copy', start: 'top 85%' },
+      y: 40, opacity: 0, duration: 0.85, stagger: 0.1, ease
+    });
+  }
+  const whyCards = gsap.utils.toArray('.ls-why-ia-grid .ls-why-card');
+  if (whyCards.length) {
+    gsap.from(whyCards, {
+      scrollTrigger: { trigger: '.ls-why-ia-grid', start: 'top 88%' },
+      y: 50, opacity: 0, duration: 0.8, stagger: 0.1, ease
+    });
+  }
+
+  /* INGREDIENT HIGHLIGHTS */
+  const ingrHlCards = gsap.utils.toArray('.ls-ingr-hl .ls-ingr-tile');
+  if (ingrHlCards.length) {
+    gsap.from('.ls-ingr-hl-header > *', {
+      scrollTrigger: { trigger: '.ls-ingr-hl-header', start: 'top 88%' },
+      y: 30, opacity: 0, duration: 0.7, stagger: 0.1, ease
+    });
+    gsap.from(ingrHlCards, {
+      scrollTrigger: { trigger: '.ls-ingr-hl-grid', start: 'top 88%' },
+      y: 50, opacity: 0, duration: 0.85, stagger: 0.12, ease
+    });
+  }
+
+  /* TRUST SECTION */
+  const trustItems = gsap.utils.toArray('.ls-trust-item');
+  if (trustItems.length) {
+    gsap.from('.ls-trust-copy > *', {
+      scrollTrigger: { trigger: '.ls-trust', start: 'top 85%' },
+      y: 40, opacity: 0, duration: 0.8, stagger: 0.1, ease
+    });
+    gsap.from(trustItems, {
+      scrollTrigger: { trigger: '.ls-trust-list', start: 'top 88%' },
+      x: -30, opacity: 0, duration: 0.6, stagger: 0.08, ease
+    });
+  }
+
   /* §8 SEASONAL */
   const seasonalInner = document.querySelector('.ls-seasonal-inner');
   if (seasonalInner) {
@@ -588,7 +643,7 @@ function initReels() {
   const reels = document.querySelectorAll('.ls-reel');
   reels.forEach((reel) => {
     reel.addEventListener('click', () => {
-      window.open('https://www.instagram.com/fawakynaturals', '_blank', 'noopener');
+      window.open('https://www.instagram.com/naturalsfawaky', '_blank', 'noopener');
     });
   });
 }
@@ -628,6 +683,23 @@ function initApp() {
   initReels();
   initHeroOverlay();
   initScrollSpy();
+  initStickyCta();
   initAnimations();
   import('./motion-fx.js').then((m) => m.default());
+}
+
+/* Mobile sticky WhatsApp CTA — reveal only once the user reaches the ending stretch
+   (from #reviews onward), not from the hero. CSS gates it to ≤768px. */
+function initStickyCta() {
+  const cta = document.querySelector('.ls-sticky-cta');
+  const trigger = document.getElementById('reviews');
+  if (!cta || !trigger) return;
+  const update = () => {
+    const triggerTop = trigger.getBoundingClientRect().top + window.scrollY;
+    const reached = (window.scrollY + window.innerHeight) > (triggerTop + 80);
+    cta.classList.toggle('is-revealed', reached);
+  };
+  window.addEventListener('scroll', update, { passive: true });
+  window.addEventListener('resize', update);
+  update();
 }
