@@ -345,10 +345,8 @@ a {
   background: var(--ls-bg);
   color: var(--ls-text);
   position: relative;
-  z-index: 2;                /* paint above the sticky hero canvas during overlap */
-  margin-top: -200px;        /* overlap: story rises into the hero tail (blended by .hero-fade) */
+  z-index: 2;
 }
-@media (max-width: 480px) { .light-sections { margin-top: -150px; } }
 
 .ls-section {
   padding: 100px 0;
@@ -3805,6 +3803,140 @@ button:focus-visible,
 
 @media (max-width: 768px) {
   .vh-heading { font-size: 56px; }
+}
+
+/* ============================================================
+   VIDEO HERO BOTTOM FADE — smooths transition into marquee below
+   ============================================================ */
+.vh-bottom-fade {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 120px;
+  z-index: 2;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    rgba(24, 0, 50, 0) 0%,
+    rgba(24, 0, 50, 0.55) 60%,
+    rgba(24, 0, 50, 0.95) 100%
+  );
+}
+
+/* ============================================================
+   BRAND PROMISES MARQUEE — auto-scrolling bridge strip
+   Sits between #video-hero and .light-sections
+   ============================================================ */
+.fw-trust-strip {
+  position: relative;
+  overflow: hidden;
+  background:
+    linear-gradient(180deg,
+      #180032 0%,
+      #22003C 50%,
+      #180032 100%);
+  border-top: 1px solid rgba(125, 79, 179, 0.22);
+  border-bottom: 1px solid rgba(125, 79, 179, 0.22);
+  padding: 22px 0;
+  isolation: isolate;
+}
+
+.fw-trust-strip::before,
+.fw-trust-strip::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 120px;
+  z-index: 2;
+  pointer-events: none;
+}
+.fw-trust-strip::before {
+  left: 0;
+  background: linear-gradient(90deg, #180032 0%, rgba(24, 0, 50, 0) 100%);
+}
+.fw-trust-strip::after {
+  right: 0;
+  background: linear-gradient(270deg, #180032 0%, rgba(24, 0, 50, 0) 100%);
+}
+
+.fw-trust-track {
+  display: flex;
+  width: max-content;
+  animation: fw-trust-scroll 38s linear infinite;
+  will-change: transform;
+}
+
+.fw-trust-strip:hover .fw-trust-track {
+  animation-play-state: paused;
+}
+
+.fw-trust-row {
+  display: flex;
+  align-items: center;
+  gap: 56px;
+  padding-right: 56px;
+  flex-shrink: 0;
+}
+
+.fw-trust-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 18px;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #F6F1EA;
+  white-space: nowrap;
+  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.35);
+}
+
+.fw-trust-ico {
+  color: var(--ls-accent-lt);
+  font-size: 0.6rem;
+  opacity: 0.75;
+  transform: translateY(-1px);
+}
+
+@keyframes fw-trust-scroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+@media (max-width: 1024px) {
+  .fw-trust-strip { padding: 18px 0; }
+  .fw-trust-row   { gap: 40px; padding-right: 40px; }
+  .fw-trust-item  { font-size: 0.95rem; letter-spacing: 0.18em; gap: 14px; }
+  .fw-trust-strip::before,
+  .fw-trust-strip::after { width: 80px; }
+  .fw-trust-track { animation-duration: 32s; }
+}
+
+@media (max-width: 768px) {
+  .fw-trust-strip { padding: 16px 0; }
+  .fw-trust-row   { gap: 32px; padding-right: 32px; }
+  .fw-trust-item  { font-size: 0.85rem; letter-spacing: 0.16em; gap: 12px; }
+  .fw-trust-strip::before,
+  .fw-trust-strip::after { width: 60px; }
+  .fw-trust-track { animation-duration: 28s; }
+}
+
+@media (max-width: 480px) {
+  .fw-trust-strip { padding: 14px 0; }
+  .fw-trust-row   { gap: 24px; padding-right: 24px; }
+  .fw-trust-item  { font-size: 0.78rem; letter-spacing: 0.14em; gap: 10px; }
+  .fw-trust-ico   { font-size: 0.5rem; }
+  .fw-trust-strip::before,
+  .fw-trust-strip::after { width: 40px; }
+  .fw-trust-track { animation-duration: 24s; }
+  .vh-bottom-fade { height: 90px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fw-trust-track { animation: none; }
 }
 
 .ls-price-block {
