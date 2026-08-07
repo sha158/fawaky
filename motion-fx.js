@@ -115,15 +115,104 @@ function initCounters() {
   });
 }
 
+/* §7 Scroll-reveal — CSS-class-based staggered entrance
+   Only targets new sections GSAP doesn't already handle.           */
+function initScrollReveal() {
+  const groups = [
+    { parent: '.ls-why-cards-grid', child: '.ls-why-card' },
+    { parent: '.ls-lifestyle-grid', child: '.ls-lifestyle-card' },
+    { parent: '.ls-stats-grid',     child: '.ls-stat-item' },
+    { parent: '.ls-faq-list',       child: '.ls-faq-item' },
+  ];
+
+  const allEls = [];
+  groups.forEach(({ parent, child }) => {
+    document.querySelectorAll(parent).forEach((grid) => {
+      const children = Array.from(grid.querySelectorAll(child));
+      children.forEach((el, i) => {
+        el.classList.add('sr-hidden');
+        el.style.transitionDelay = `${i * 70}ms`;
+        allEls.push(el);
+      });
+    });
+  });
+  if (!allEls.length) return;
+
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (!entry.isIntersecting) return;
+      entry.target.classList.add('sr-visible');
+      obs.unobserve(entry.target);
+    });
+  }, { threshold: 0.12 });
+
+  allEls.forEach((el) => obs.observe(el));
+}
+
+/* §8 FAQ accordion (custom button/div replace <details>) ────── */
+function initFaqAccordion() {
+  document.querySelectorAll('.ls-faq-q').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const item = btn.closest('.ls-faq-item');
+      const isOpen = item.classList.contains('is-open');
+      // Collapse all
+      document.querySelectorAll('.ls-faq-item.is-open').forEach((i) => {
+        i.classList.remove('is-open');
+        i.querySelector('.ls-faq-q').setAttribute('aria-expanded', 'false');
+      });
+      // Toggle clicked
+      if (!isOpen) {
+        item.classList.add('is-open');
+        btn.setAttribute('aria-expanded', 'true');
+      }
+    });
+  });
+}
+
 /* ─── Entry ─────────────────────────────────────────────────── */
+function initVideoHero() {
+  const isMobile    = window.innerWidth <= 768;
+  const videoDesktop = document.getElementById('vh-video');
+  const videoMobile  = document.getElementById('vh-video-mobile');
+  const activeVideo  = isMobile ? videoMobile : videoDesktop;
+  const idleVideo    = isMobile ? videoDesktop : videoMobile;
+  const content = document.querySelector('.vh-content');
+
+  if (!activeVideo) return;
+
+  if (idleVideo) { idleVideo.pause(); }
+
+  function forcePlay(v) {
+    if (!v) return;
+    v.play().catch(() => {
+      setTimeout(() => v.play().catch(() => {}), 300);
+    });
+  }
+
+  forcePlay(activeVideo);
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') forcePlay(activeVideo);
+  });
+
+  if (typeof gsap !== 'undefined' && content) {
+    gsap.from('.vh-heading',  { opacity: 0, y: 28, duration: 1,   ease: 'power3.out', delay: 0.2  });
+    gsap.from('.vh-tagline',  { opacity: 0, y: 20, duration: 1,   ease: 'power3.out', delay: 0.35 });
+    gsap.from('.vh-cta-row',  { opacity: 0, y: 16, duration: 0.8, ease: 'power3.out', delay: 0.7  });
+  }
+}
+
 export default function initMotionFx() {
   // Header frost + progress bar are subtle and useful even with
   // reduced motion off; the rest is gated below.
   initHeaderScroll();
+  initFaqAccordion();   // accordion works regardless of reduced motion
+  initVideoHero();
   if (reducedMotion) return;
   initProgressBar();
   initMagnetic();
   initTilt();
   initMarquee();
   initCounters();
+  initScrollReveal();
 }

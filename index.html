@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Fawaky Naturals | Premium Ice Apple Juice</title>
-  <meta name="description" content="Fawaky Naturals Pvt. Ltd. — Premium Ice Apple beverage. No artificial colours, no preservatives, no essences. Pure tropical refreshment.">
+  <meta name="description" content="Fawaky Naturals Pvt Ltd. — Premium Ice Apple beverage. No artificial colours, no preservatives, no essences. Pure tropical refreshment.">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -32,7 +32,7 @@
     </a>
     <nav>
       <a href="#about">Our Story</a>
-      <a href="#bestseller">Bestseller</a>
+      <a href="#bestseller">Our Drink</a>
       <a href="#wholesale">Wholesale</a>
       <a href="#faq">FAQ</a>
     </nav>
@@ -41,7 +41,7 @@
     </button>
     <div class="mobile-nav" id="mobile-nav">
       <a href="#about">Our Story</a>
-      <a href="#bestseller">Bestseller</a>
+      <a href="#bestseller">Our Drink</a>
       <a href="#reels">Reels</a>
       <a href="#wholesale">Wholesale</a>
       <a href="#faq">FAQ</a>
@@ -52,45 +52,84 @@
   <!-- Scroll progress bar -->
   <div id="scroll-prog" class="scroll-prog" aria-hidden="true"></div>
 
-  <!-- Hero Scroll Animation — DO NOT MODIFY (canvas/mechanism). Overlay below is additive. -->
-  <main class="scroll-container" id="scroll-container">
-    <div class="canvas-wrapper">
-      <canvas id="animation-canvas"></canvas>
-      <div class="hero-scrim" aria-hidden="true"></div>
-      <div class="hero-fade" aria-hidden="true"></div>
-      <div class="hero-overlay" id="hero-overlay">
-        <h1 class="hero-line hero-line-1" data-hero-line="1">We're not making juice.<br><em>We're bottling a <span class="hero-accent">natural</span> way of life.</em></h1>
-        <p class="hero-line hero-line-2" data-hero-line="2">Naturally refreshing. Purely <span class="hero-accent">delicious</span>.</p>
-        <div class="hero-cta" id="hero-cta">
-          <a href="#bestseller" class="ls-btn-outline">View Bestseller</a>
-        </div>
+  <!-- Video Hero — Premium full-screen opener -->
+  <section id="video-hero" aria-label="Fawaky Naturals — Video Hero">
+    <video
+      id="vh-video"
+      class="vh-video vh-video-desktop"
+      src="./assets/Fawaky_Naturals_Ice_Apple_Milkshake_202606181731.mp4"
+      autoplay
+      loop
+      playsinline
+      muted
+      preload="auto"
+      aria-hidden="true"
+    ></video>
+    <video
+      id="vh-video-mobile"
+      class="vh-video vh-video-mobile"
+      src="./assets/hero-mobile.mp4"
+      autoplay
+      loop
+      playsinline
+      muted
+      preload="auto"
+      aria-hidden="true"
+    ></video>
+
+    <div class="vh-overlay" aria-hidden="true"></div>
+
+    <div class="vh-content">
+      <h1 class="vh-heading">Nature's Coolest Indulgence.</h1>
+      <p class="vh-tagline"><span class="vh-green">Pure Ice Apple Refreshment,</span> Crafted for Every Moment.</p>
+      <div class="vh-cta-row">
+        <a href="#about" class="vh-btn-primary">Explore Our Story</a>
       </div>
     </div>
-  </main>
+
+  </section>
+
 
   <!-- Below-fold sections -->
   <div class="light-sections">
 
-    <!-- Benefits Strip -->
-    <section class="ls-section ls-benefits-strip" id="benefits-strip" aria-label="Key Benefits">
+    <!-- Why Fawaky — 4-card premium section -->
+    <section class="ls-section ls-benefits-strip ls-why-section" id="benefits-strip" aria-label="Why Fawaky Naturals">
       <div class="ls-inner">
-        <div class="ls-badge-row">
-          <div class="ls-benefit-badge">
-            <span class="ls-benefit-badge-icon">💧</span>
-            <span class="ls-benefit-badge-label">Naturally Hydrating</span>
-          </div>
-          <div class="ls-benefit-badge">
-            <span class="ls-benefit-badge-icon">❄️</span>
-            <span class="ls-benefit-badge-label">Summer Cooling</span>
-          </div>
-          <div class="ls-benefit-badge">
-            <span class="ls-benefit-badge-icon">⚡</span>
-            <span class="ls-benefit-badge-label">Energy Boost</span>
-          </div>
-          <div class="ls-benefit-badge">
-            <span class="ls-benefit-badge-icon">🌿</span>
-            <span class="ls-benefit-badge-label">Digestive Support</span>
-          </div>
+        <div class="ls-section-head">
+          <span class="ls-tag ls-tag-dark">Why Choose Us</span>
+          <h2 class="ls-heading">Why Fawaky?</h2>
+          <p class="ls-subtext">Real tropical flavour. Real premium quality.</p>
+        </div>
+        <div class="ls-why-grid ls-why-cards-grid">
+          <article class="ls-why-card ls-card">
+            <div class="ls-why-card-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6.05 8.24C4.27 9.86 3 12.04 3 14.5 3 18.64 6.36 22 10.5 22c2.17 0 4.14-.9 5.55-2.34l-9-11.42zm14.16-6.24C19.56 2 18 2 17 2c-3.92 0-7.28 2.09-9.14 5.24l9.38 11.88C19.45 17.35 21 15.1 21 12.5c0-2.06-.49-3.51-.5-3.5l.71-7z"/></svg>
+            </div>
+            <h3 class="ls-why-title">Real Ice Apple</h3>
+            <p class="ls-why-desc">Authentic tropical flavour inspired by nature — no shortcuts, no imitations.</p>
+          </article>
+          <article class="ls-why-card ls-card">
+            <div class="ls-why-card-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+            </div>
+            <h3 class="ls-why-title">Premium Ingredients</h3>
+            <p class="ls-why-desc">Carefully crafted with quality ingredients — every sip is the real thing.</p>
+          </article>
+          <article class="ls-why-card ls-card">
+            <div class="ls-why-card-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg>
+            </div>
+            <h3 class="ls-why-title">No Artificial Colours</h3>
+            <p class="ls-why-desc">Clean and refreshing taste, just as nature intended. Pure and transparent always.</p>
+          </article>
+          <article class="ls-why-card ls-card">
+            <div class="ls-why-card-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6.76 4.84l-1.8-1.79-1.41 1.41 1.79 1.79 1.42-1.41zM4 10.5H1v2h3v-2zm9-9.95h-2V3.5h2V.55zm7.45 3.91l-1.41-1.41-1.79 1.79 1.41 1.41 1.79-1.79zm-3.21 13.7l1.79 1.8 1.41-1.41-1.8-1.79-1.4 1.4zM20 10.5v2h3v-2h-3zm-8-5c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm-1 16.95h2V19.5h-2v2.95zm-7.45-3.91l1.41 1.41 1.79-1.8-1.41-1.41-1.79 1.8z"/></svg>
+            </div>
+            <h3 class="ls-why-title">Everyday Refreshment</h3>
+            <p class="ls-why-desc">Perfect for any occasion — the taste that lifts every moment, every time.</p>
+          </article>
         </div>
       </div>
     </section>
@@ -105,12 +144,12 @@
           <div class="ls-ia-hero-visual">
             <div class="ls-ia-hero-ring" aria-hidden="true"></div>
             <picture>
-              <source srcset="/assets/ice-apple-hero.webp" type="image/webp">
-              <img class="ls-ia-hero-img" src="/assets/ice-apple-hero.jpeg" alt="Fresh ice apple (Nungu) — translucent jelly segments and whole fruit on a wooden plate with banana leaf" width="521" height="600" loading="lazy" decoding="async">
+              <source srcset="/assets/38701bd5-2173-4961-962f-a5c933ea0f9c.webp" type="image/webp">
+              <img class="ls-ia-hero-img" src="/assets/38701bd5-2173-4961-962f-a5c933ea0f9c.png" alt="Fresh ice apple (Nungu) — whole and peeled fruits on a wooden plate with banana leaf, purple background" width="1312" height="1199" loading="lazy" decoding="async">
             </picture>
           </div>
           <div class="ls-ia-hero-copy">
-            <span class="ls-tag ls-tag-dark">Nature's Summer Cooler</span>
+            <span class="ls-tag ls-tag-dark">Nature's Own Refresher</span>
             <h2 class="ls-heading">Sip The Refreshing<br>Coolness of Ice Apple!!</h2>
             <p class="ls-subtext ls-ia-subtext">A generations-old South Indian treasure, bottled the natural way — naturally sweet, and never anything artificial.</p>
             <p class="ls-ia-statement">Pure and naturally hydrating. Zero artificial colours, preservatives or essences. This is what real refreshment tastes like.</p>
@@ -163,32 +202,32 @@
                 <img src="/assets/df010659-d1be-4823-9680-d7c3e138cf5f.png" alt="Ice apple cut open showing translucent jelly segments" width="600" height="485" loading="lazy" decoding="async">
               </picture>
             </div>
-            <div class="ls-ingr-icon ls-icon-green"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;" aria-hidden="true">eco</span></div>
+            <div class="ls-ingr-icon ls-icon-green"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6.05 8.24C4.27 9.86 3 12.04 3 14.5 3 18.64 6.36 22 10.5 22c2.17 0 4.14-.9 5.55-2.34l-9-11.42zm14.16-6.24C19.56 2 18 2 17 2c-3.92 0-7.28 2.09-9.14 5.24l9.38 11.88C19.45 17.35 21 15.1 21 12.5c0-2.06-.49-3.51-.5-3.5l.71-7z"/></svg></div>
             <h3 class="ls-ingr-title ls-ingr-title-white">Straight From the Fruit</h3>
-            <p class="ls-ingr-desc">Naturally hydrating, the way summer should taste. Real ice apple endosperm — gentle, refreshing goodness straight from the fruit.</p>
+            <p class="ls-ingr-desc">Naturally hydrating, the way refreshment should taste. Real ice apple endosperm — gentle, refreshing goodness straight from the fruit.</p>
           </article>
           <article class="ls-ingr-tile ls-ingr-light">
-            <div class="ls-ingr-icon ls-icon-blue"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;" aria-hidden="true">bolt</span></div>
+            <div class="ls-ingr-icon ls-icon-blue"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg></div>
             <h3 class="ls-ingr-title">Natural Electrolytes</h3>
             <p class="ls-ingr-desc">A natural source of electrolytes like potassium that support normal fluid balance.</p>
           </article>
           <article class="ls-ingr-tile ls-ingr-light">
-            <div class="ls-ingr-icon ls-icon-blue"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;" aria-hidden="true">ac_unit</span></div>
+            <div class="ls-ingr-icon ls-icon-blue"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M22 11h-4.17l3.24-3.24-1.41-1.42L15 11h-2V9l4.66-4.66-1.42-1.41L13 6.17V2h-2v4.17L7.76 2.93 6.34 4.34 11 9v2H9L4.34 6.34 2.93 7.76 6.17 11H2v2h4.17l-3.24 3.24 1.41 1.42L9 13h2v2l-4.66 4.66 1.42 1.41L11 17.83V22h2v-4.17l3.24 3.24 1.42-1.41L13 15v-2h2l4.66 4.66 1.41-1.42L17.83 13H22v-2z"/></svg></div>
             <h3 class="ls-ingr-title">A South Indian Tradition</h3>
-            <p class="ls-ingr-desc">The summer cooler generations grew up on, known across the south as Nungu.</p>
+            <p class="ls-ingr-desc">The beloved cooler generations grew up on, known across the south as Nungu.</p>
           </article>
           <article class="ls-ingr-tile ls-ingr-light">
-            <div class="ls-ingr-icon ls-icon-purple"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;" aria-hidden="true">spa</span></div>
+            <div class="ls-ingr-icon ls-icon-purple"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 22c4.97 0 9-4.03 9-9-4.97 0-9 4.03-9 9zm0 0c0-4.97-4.03-9-9-9 0 4.97 4.03 9 9 9zm0-18C7.03 4 3 8.03 3 13c4.97 0 9-4.03 9-9zm0 0c4.97 0 9 4.03 9 9 0-4.97-4.03-9-9-9z"/></svg></div>
             <h3 class="ls-ingr-title">Light &amp; Naturally Sweet</h3>
             <p class="ls-ingr-desc">Light and gently sweet — mostly the fruit's own natural sweetness, with just a light touch of sugar.</p>
           </article>
           <article class="ls-ingr-tile ls-ingr-light">
-            <div class="ls-ingr-icon ls-icon-green"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;" aria-hidden="true">eco</span></div>
+            <div class="ls-ingr-icon ls-icon-green"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6.05 8.24C4.27 9.86 3 12.04 3 14.5 3 18.64 6.36 22 10.5 22c2.17 0 4.14-.9 5.55-2.34l-9-11.42zm14.16-6.24C19.56 2 18 2 17 2c-3.92 0-7.28 2.09-9.14 5.24l9.38 11.88C19.45 17.35 21 15.1 21 12.5c0-2.06-.49-3.51-.5-3.5l.71-7z"/></svg></div>
             <h3 class="ls-ingr-title">Real Nutrients Inside</h3>
             <p class="ls-ingr-desc">A source of vitamin C, calcium and iron, with natural plant compounds from the fruit.</p>
           </article>
           <article class="ls-ingr-tile ls-ingr-light">
-            <div class="ls-ingr-icon ls-icon-purple"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;" aria-hidden="true">nutrition</span></div>
+            <div class="ls-ingr-icon ls-icon-purple"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.06 22.99h1.66c.84 0 1.53-.64 1.63-1.46L23 5.05h-5V1h-1.97v4.05h-4.97l.3 2.34c1.71.47 3.31 1.32 4.27 2.26 1.44 1.42 2.43 2.89 2.43 5.29v8.05zM1 21.99V21h15.03v.99c0 .55-.45 1-1.01 1H2.01c-.56 0-1.01-.45-1.01-1zm15.03-7c0-2.4-1-3.9-2.5-5.3A8.5 8.5 0 0 0 7.5 7.5C4.42 7.5 1 9.45 1 14.99h15.03z"/></svg></div>
             <h3 class="ls-ingr-title">Fermented Coconut Jelly</h3>
             <p class="ls-ingr-desc">Chewy fermented coconut gel — a light, fat-free source of fibre.</p>
           </article>
@@ -204,14 +243,14 @@
       </div>
     </section>
 
-    <!-- Why Ice Apple + Benefits Grid -->
+    <!-- Benefits That Feel Good -->
     <section class="ls-section ls-why-ia" id="why-ia">
       <div class="ls-inner">
         <div class="ls-why-ia-hero">
           <div class="ls-why-ia-copy">
-            <span class="ls-tag">Why Ice Apple</span>
-            <h2 class="ls-heading">Powered by Nature's<br>Summer Fruit</h2>
-            <p class="ls-subtext ls-subtext-white">Harvested from the Palmyra palm, Ice Apple has been enjoyed for generations across South India for its refreshing taste, cooling nature and naturally hydrating properties. FAWAKY delivers a uniquely tropical refreshment experience.</p>
+            <span class="ls-tag">The Ice Apple Difference</span>
+            <h2 class="ls-heading">Benefits That<br>Feel Good</h2>
+            <p class="ls-subtext ls-subtext-white">Ice Apple — nature's own refresher, harvested from the Palmyra palm and enjoyed across South India for generations. Fawaky bottles this heritage the right way: refreshing, real, and never artificial.</p>
           </div>
           <div class="ls-why-ia-visual">
             <picture>
@@ -221,26 +260,68 @@
           </div>
         </div>
         <div class="ls-why-grid ls-why-ia-grid">
-          <article class="ls-why-card">
-            <div class="ls-ingr-icon ls-icon-blue"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;" aria-hidden="true">water_drop</span></div>
-            <h3 class="ls-why-title">Hydration Boost</h3>
-            <p class="ls-why-desc">High water content helps keep you refreshed throughout the day.</p>
+          <article class="ls-why-card ls-card">
+            <div class="ls-ingr-icon ls-icon-blue"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2c-5.33 4.55-8 8.48-8 11.8 0 4.98 3.8 8.2 8 8.2s8-3.22 8-8.2c0-3.32-2.67-7.25-8-11.8zm0 18c-3.35 0-6-2.57-6-6.2 0-2.34 1.95-5.44 6-9.14 4.05 3.7 6 6.79 6 9.14 0 3.63-2.65 6.2-6 6.2z"/></svg></div>
+            <h3 class="ls-why-title">Naturally Refreshing</h3>
+            <p class="ls-why-desc">Designed to bring a cooling and enjoyable experience — every single sip.</p>
           </article>
-          <article class="ls-why-card">
-            <div class="ls-ingr-icon ls-icon-blue"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;" aria-hidden="true">ac_unit</span></div>
-            <h3 class="ls-why-title">Natural Cooling</h3>
-            <p class="ls-why-desc">Traditionally enjoyed as a refreshing fruit during warm summer months.</p>
+          <article class="ls-why-card ls-card">
+            <div class="ls-ingr-icon ls-icon-blue"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M22 11h-4.17l3.24-3.24-1.41-1.42L15 11h-2V9l4.66-4.66-1.42-1.41L13 6.17V2h-2v4.17L7.76 2.93 6.34 4.34 11 9v2H9L4.34 6.34 2.93 7.76 6.17 11H2v2h4.17l-3.24 3.24 1.41 1.42L9 13h2v2l-4.66 4.66 1.42 1.41L11 17.83V22h2v-4.17l3.24 3.24 1.42-1.41L13 15v-2h2l4.66 4.66 1.41-1.42L17.83 13H22v-2z"/></svg></div>
+            <h3 class="ls-why-title">Light &amp; Delicious</h3>
+            <p class="ls-why-desc">Easy to enjoy any time of the day — light on the palate, big on flavour.</p>
           </article>
-          <article class="ls-why-card">
-            <div class="ls-ingr-icon ls-icon-green"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;" aria-hidden="true">bolt</span></div>
-            <h3 class="ls-why-title">Energy Boost</h3>
-            <p class="ls-why-desc">Naturally occurring carbohydrates provide a gentle energy lift.</p>
+          <article class="ls-why-card ls-card">
+            <div class="ls-ingr-icon ls-icon-green"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg></div>
+            <h3 class="ls-why-title">Perfect For Any Occasion</h3>
+            <p class="ls-why-desc">Inspired by tropical freshness — the drink made for every occasion, any time of year.</p>
           </article>
-          <article class="ls-why-card">
-            <div class="ls-ingr-icon ls-icon-green"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;" aria-hidden="true">spa</span></div>
-            <h3 class="ls-why-title">Digestive Support</h3>
-            <p class="ls-why-desc">Contains dietary fiber that supports healthy digestion.</p>
+          <article class="ls-why-card ls-card">
+            <div class="ls-ingr-icon ls-icon-green"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 22c4.97 0 9-4.03 9-9-4.97 0-9 4.03-9 9zm0 0c0-4.97-4.03-9-9-9 0 4.97 4.03 9 9 9zm0-18C7.03 4 3 8.03 3 13c4.97 0 9-4.03 9-9zm0 0c4.97 0 9 4.03 9 9 0-4.97-4.03-9-9-9z"/></svg></div>
+            <h3 class="ls-why-title">Made For Everyone</h3>
+            <p class="ls-why-desc">Loved by families, kids, and young adults — a drink everyone at the table can enjoy.</p>
           </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Lifestyle Experience -->
+    <section class="ls-section ls-lifestyle" id="lifestyle" aria-label="Fawaky lifestyle">
+      <div class="ls-inner">
+        <div class="ls-lifestyle-header">
+          <span class="ls-tag ls-tag-dark">Feel the Difference</span>
+          <h2 class="ls-heading">"A Drink That<br>Feels Like Pure Joy"</h2>
+          <p class="ls-subtext">Made for joyful moments and refreshing experiences.</p>
+        </div>
+        <div class="ls-lifestyle-grid">
+          <div class="ls-lifestyle-card">
+            <picture>
+              <img src="/assets/ice-apple-fruits-lifestyle.jpeg" alt="Fawaky Ice Apple can with ice apple fruits on purple background" width="1400" height="933" loading="lazy" decoding="async">
+            </picture>
+            <div class="ls-lifestyle-caption">
+              <span class="ls-lifestyle-caption-tag">Good Vibes</span>
+              <p>The tropical companion for every mood, every occasion.</p>
+            </div>
+          </div>
+          <div class="ls-lifestyle-card">
+            <picture>
+              <source srcset="/assets/6e99ca7a-fbb6-477a-82b4-0068844efb2a.webp" type="image/webp">
+              <img src="/assets/6e99ca7a-fbb6-477a-82b4-0068844efb2a.png" alt="Hand holding Fawaky can in tropical setting" width="1023" height="1537" loading="lazy" decoding="async">
+            </picture>
+            <div class="ls-lifestyle-caption">
+              <span class="ls-lifestyle-caption-tag">Every Occasion</span>
+              <p>From family gatherings to café afternoons.</p>
+            </div>
+          </div>
+          <div class="ls-lifestyle-card">
+            <picture>
+              <source srcset="/assets/product-can-new.jpeg" type="image/webp">
+              <img src="/assets/product-can-new.jpeg" alt="Fawaky can with dramatic cream splash on deep violet" width="1400" height="1050" loading="lazy" decoding="async">
+            </picture>
+            <div class="ls-lifestyle-caption">
+              <span class="ls-lifestyle-caption-tag">Premium Quality</span>
+              <p>Cinematic. Tropical. Unforgettable.</p>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -270,17 +351,17 @@
 
                 <div class="sty-nutri-stats sty-bene-row" role="list" aria-label="What your body gets">
                   <div class="sty-bene" role="listitem">
-                    <span class="sty-bene-ico" aria-hidden="true"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">spa</span></span>
+                    <span class="sty-bene-ico" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 22c4.97 0 9-4.03 9-9-4.97 0-9 4.03-9 9zm0 0c0-4.97-4.03-9-9-9 0 4.97 4.03 9 9 9zm0-18C7.03 4 3 8.03 3 13c4.97 0 9-4.03 9-9zm0 0c4.97 0 9 4.03 9 9 0-4.97-4.03-9-9-9z"/></svg></span>
                     <span class="sty-bene-name">Natural Hydration</span>
                     <span class="sty-bene-sub">Ice Apple Pulp</span>
                   </div>
                   <div class="sty-bene" role="listitem">
-                    <span class="sty-bene-ico" aria-hidden="true"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">eco</span></span>
+                    <span class="sty-bene-ico" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6.05 8.24C4.27 9.86 3 12.04 3 14.5 3 18.64 6.36 22 10.5 22c2.17 0 4.14-.9 5.55-2.34l-9-11.42zm14.16-6.24C19.56 2 18 2 17 2c-3.92 0-7.28 2.09-9.14 5.24l9.38 11.88C19.45 17.35 21 15.1 21 12.5c0-2.06-.49-3.51-.5-3.5l.71-7z"/></svg></span>
                     <span class="sty-bene-name">Real Ice Apple Pulp</span>
                     <span class="sty-bene-sub">Authentic Nungu</span>
                   </div>
                   <div class="sty-bene" role="listitem">
-                    <span class="sty-bene-ico" aria-hidden="true"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">bolt</span></span>
+                    <span class="sty-bene-ico" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg></span>
                     <span class="sty-bene-name">Natural Fruit Sugars</span>
                     <span class="sty-bene-sub">Gentle, real energy</span>
                   </div>
@@ -332,11 +413,11 @@
               <article class="sty-panel sty-panel--5" data-step="5">
                 <div class="sty-visual sty-visual--float">
                   <picture>
-                    <source srcset="/assets/0877bdbc-dd73-4b40-8724-a7de28cd0f7d.webp" type="image/webp">
-                    <img src="/assets/0877bdbc-dd73-4b40-8724-a7de28cd0f7d.png" alt="Fawaky Naturals Ice Apple can" width="1024" height="1536" loading="lazy" decoding="async">
+                    <source srcset="/assets/product-can-new.jpeg" type="image/webp">
+                    <img src="/assets/product-can-new.jpeg" alt="Fawaky Naturals Ice Apple can" width="1024" height="1536" loading="lazy" decoding="async">
                   </picture>
                 </div>
-                <h2 class="sty-title">FAWAKY Naturals</h2>
+                <h2 class="sty-title">Fawaky Naturals</h2>
                 <p class="sty-sub">The modern way to enjoy a timeless fruit.</p>
               </article>
 
@@ -358,11 +439,11 @@
               interaction-prompt="none" shadow-intensity="1" exposure="1.05"
               ar ar-modes="webxr scene-viewer quick-look" ios-src="/assets/can.usdz"
               loading="lazy">
-              <img slot="poster" class="sty-3d-poster" src="/assets/0877bdbc-dd73-4b40-8724-a7de28cd0f7d.webp" alt="Fawaky Ice Apple can">
+              <img slot="poster" class="sty-3d-poster" src="/assets/product-can-new.jpeg" alt="Fawaky Ice Apple can">
               <button slot="ar-button" class="sty-3d-ar">View in your room</button>
             </model-viewer>
             <div class="sty-3d-bar">
-              <span class="sty-3d-hint"><span class="material-symbols-outlined" aria-hidden="true">3d_rotation</span> Drag to rotate</span>
+              <span class="sty-3d-hint"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13 2.05v2.02c3.95.49 7 3.85 7 7.93 0 3.21-1.81 6.1-4.72 7.72L13 17v5h5l-1.22-1.22C19.91 19.07 22 15.76 22 12c0-5.18-3.95-9.45-9-9.95zM11 2.05C5.95 2.55 2 6.82 2 12c0 3.76 2.09 7.07 5.22 8.78L6 22h5v-5l-2.28 2.28C7.28 18.13 6 15.21 6 12c0-4.08 3.05-7.44 7-7.93V2.05z"/></svg> Drag to rotate</span>
               <a class="sty-3d-cta ls-btn-whatsapp" href="https://wa.me/917204006560" target="_blank" rel="noopener">Order on WhatsApp</a>
             </div>
             <p class="sty-3d-continue" aria-hidden="true">Scroll to continue ↓</p>
@@ -386,14 +467,14 @@
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
                 Order on WhatsApp
               </a>
-              <a href="#bestseller" class="ls-btn-outline">View Bestseller</a>
+              <a href="#bestseller" class="ls-btn-outline">Discover Our Drink</a>
             </div>
           </div>
           <div class="ls-product-hero-visual">
             <div class="ls-can-glow"></div>
             <picture>
-              <source srcset="/assets/0877bdbc-dd73-4b40-8724-a7de28cd0f7d.webp" type="image/webp">
-              <img src="/assets/0877bdbc-dd73-4b40-8724-a7de28cd0f7d.png" alt="Fawaky Ice Apple Juice can" class="ls-can-img" width="1024" height="1536" fetchpriority="high" decoding="async">
+              <source srcset="/assets/product-can-new.jpeg" type="image/webp">
+              <img src="/assets/product-can-new.jpeg" alt="Fawaky Ice Apple Juice can" class="ls-can-img" width="1024" height="1536" fetchpriority="high" decoding="async">
             </picture>
           </div>
         </div>
@@ -427,18 +508,24 @@
         <div class="ls-bestseller-grid">
           <div class="ls-bestseller-visual">
             <picture>
-              <source srcset="/assets/bestseller-can.webp" type="image/webp">
-              <img src="/assets/bestseller-can.jpeg" alt="Fawaky Ice Apple can with a dramatic cream splash crown on deep violet" class="ls-bestseller-img" width="1400" height="1050" loading="lazy" decoding="async">
+              <source srcset="/assets/product-can-new.jpeg" type="image/webp">
+              <img src="/assets/product-can-new.jpeg" alt="Fawaky Ice Apple can with a dramatic cream splash crown on deep violet" class="ls-bestseller-img" width="1400" height="1050" loading="lazy" decoding="async">
             </picture>
           </div>
           <div class="ls-bestseller-content">
-            <span class="ls-tag-star"><span class="material-symbols-outlined ls-tag-ico" style="font-variation-settings:'FILL' 1;" aria-hidden="true">star</span>Our Most Loved</span>
+            <span class="ls-tag-star"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>Our Most Loved</span>
             <h2 class="ls-heading ls-heading-white">Ice Apple</h2>
             <p class="ls-subtext ls-subtext-white">A premium blend of hand-harvested Nungu pulp — naturally cooling, gently sweet, and refreshingly light in every sip.</p>
             <div class="ls-stats-row">
               <div class="ls-stat-pill">No Preservatives</div>
               <div class="ls-stat-pill">No Artificial Colours</div>
               <div class="ls-stat-pill">Purely Natural</div>
+              <div class="ls-stat-pill">200 ml</div>
+            </div>
+            <div class="ls-price-block">
+              <span class="ls-price-old">₹99</span>
+              <span class="ls-price-new">₹60</span>
+              <span class="ls-price-label">per can</span>
             </div>
             <a href="https://wa.me/917204006560" class="ls-btn-whatsapp ls-btn-whatsapp-lg" target="_blank" rel="noopener">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
@@ -455,14 +542,15 @@
         <div class="ls-about-grid">
           <div class="ls-about-visual">
             <picture>
-              <source srcset="/assets/0877bdbc-dd73-4b40-8724-a7de28cd0f7d.webp" type="image/webp">
-              <img class="ls-about-img" src="/assets/0877bdbc-dd73-4b40-8724-a7de28cd0f7d.png" alt="Fawaky Ice Apple Juice can with condensation" width="1400" height="1050" loading="lazy" decoding="async">
+              <source srcset="/assets/product-can-new.jpeg" type="image/webp">
+              <img class="ls-about-img" src="/assets/product-can-new.jpeg" alt="Fawaky Ice Apple Juice can with condensation" width="1400" height="1050" loading="lazy" decoding="async">
             </picture>
           </div>
           <div class="ls-about-copy">
             <span class="ls-tag ls-tag-light">Our Story</span>
             <h2 class="ls-heading ls-heading-ink">Bottled the Way<br>Nature Intended</h2>
             <p class="ls-about-text">Fawaky Naturals began with a simple idea — tropical refreshment with nothing to hide. Real Ice Apple (Nungu). No artificial colours, no preservatives, no essences. Just premium, natural taste in every can.</p>
+            <p class="ls-about-legal">Fawaky Naturals is a premium tropical beverage brand owned and operated by Fawaky Naturals Pvt Ltd., committed to delivering refreshing, high-quality natural beverages.</p>
             <a href="https://wa.me/917204006560?text=Hi%20Fawaky%20Naturals%2C%20I%27d%20like%20to%20order%20the%20Ice%20Apple%20drink." class="ls-btn-whatsapp ls-btn-whatsapp-lg" target="_blank" rel="noopener">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
               Order on WhatsApp</a>
@@ -477,8 +565,9 @@
         <div class="ls-ingr-hl-header">
           <span class="ls-tag">What's Inside</span>
           <h2 class="ls-heading">Made With Real Ingredients</h2>
+          <p class="ls-subtext">Every ingredient chosen for taste, quality and transparency.</p>
         </div>
-        <div class="ls-ingr-hl-grid">
+        <div class="ls-ingr-hl-grid ls-ingr-hl-grid-4">
           <article class="ls-ingr-tile ls-ingr-light">
             <div class="ls-ia-card-media">
               <picture>
@@ -486,9 +575,65 @@
                 <img src="/assets/df010659-d1be-4823-9680-d7c3e138cf5f.png" alt="Ice apple (Nungu) cut open showing translucent white jelly segments" width="600" height="600" loading="lazy" decoding="async">
               </picture>
             </div>
-            <h3 class="ls-ingr-title">Ice Apple</h3>
-            <p class="ls-ingr-desc">Naturally cooling, hydrating and refreshingly light.</p>
+            <h3 class="ls-ingr-title">Ice Apple (Nungu)</h3>
+            <p class="ls-ingr-desc">The hero ingredient. Naturally cooling tropical fruit, harvested from the Palmyra palm.</p>
           </article>
+          <article class="ls-ingr-tile ls-ingr-light">
+            <div class="ls-ia-card-media">
+              <picture>
+                <source srcset="/assets/8475ba77-c5c8-4bea-b38f-e121544ca16d.webp" type="image/webp">
+                <img src="/assets/8475ba77-c5c8-4bea-b38f-e121544ca16d.png" alt="Chewy nata de coco coconut gel jelly cubes" width="600" height="600" loading="lazy" decoding="async">
+              </picture>
+            </div>
+            <h3 class="ls-ingr-title">Nata De Coco</h3>
+            <p class="ls-ingr-desc">Chewy fermented coconut gel — a light, tropical classic in every sip.</p>
+          </article>
+          <article class="ls-ingr-tile ls-ingr-light ls-ingr-icon-tile">
+            <div class="ls-ingr-hl-icon">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2c-5.33 4.55-8 8.48-8 11.8 0 4.98 3.8 8.2 8 8.2s8-3.22 8-8.2c0-3.32-2.67-7.25-8-11.8zm0 18c-3.35 0-6-2.57-6-6.2 0-2.34 1.95-5.44 6-9.14 4.05 3.7 6 6.79 6 9.14 0 3.63-2.65 6.2-6 6.2z"/></svg>
+            </div>
+            <h3 class="ls-ingr-title">Purified Water</h3>
+            <p class="ls-ingr-desc">Clean, quality water as the pure base — no compromises on what goes in.</p>
+          </article>
+          <article class="ls-ingr-tile ls-ingr-light ls-ingr-icon-tile">
+            <div class="ls-ingr-hl-icon ls-ingr-hl-icon-green">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6.05 8.24C4.27 9.86 3 12.04 3 14.5 3 18.64 6.36 22 10.5 22c2.17 0 4.14-.9 5.55-2.34l-9-11.42zm14.16-6.24C19.56 2 18 2 17 2c-3.92 0-7.28 2.09-9.14 5.24l9.38 11.88C19.45 17.35 21 15.1 21 12.5c0-2.06-.49-3.51-.5-3.5l.71-7z"/></svg>
+            </div>
+            <h3 class="ls-ingr-title">Natural Flavours</h3>
+            <p class="ls-ingr-desc">No artificial essences — just the real, honest taste of premium tropical fruit.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Statistics Strip -->
+    <section class="ls-section ls-stats" id="stats" aria-label="Brand statistics">
+      <div class="ls-inner">
+        <div class="ls-stats-grid">
+          <div class="ls-stat-item">
+            <div class="ls-stat-number-wrap">
+              <span class="ls-stat-big" data-count="100">100</span><span class="ls-stat-unit">%</span>
+            </div>
+            <p class="ls-stat-label">Premium Quality</p>
+          </div>
+          <div class="ls-stat-item">
+            <div class="ls-stat-number-wrap">
+              <span class="ls-stat-big" data-count="0">0</span><span class="ls-stat-unit">%</span>
+            </div>
+            <p class="ls-stat-label">Artificial Colours</p>
+          </div>
+          <div class="ls-stat-item">
+            <div class="ls-stat-number-wrap">
+              <span class="ls-stat-word">Real</span>
+            </div>
+            <p class="ls-stat-label">Ice Apple Inside</p>
+          </div>
+          <div class="ls-stat-item">
+            <div class="ls-stat-number-wrap">
+              <span class="ls-stat-word">Ready</span>
+            </div>
+            <p class="ls-stat-label">To Drink Anytime</p>
+          </div>
         </div>
       </div>
     </section>
@@ -509,8 +654,8 @@
               <span class="ls-bubble" style="left:88%; width:13px; height:13px; animation-delay:1.0s;"></span>
             </div>
             <picture>
-              <source srcset="/assets/showcase-can.webp" type="image/webp">
-              <img src="/assets/showcase-can.jpeg" alt="Frosted Fawaky Ice Apple can with ice cubes and cold mist" class="ls-showcase-can" width="1400" height="1050" loading="lazy" decoding="async">
+              <source srcset="/assets/product-can-new.jpeg" type="image/webp">
+              <img src="/assets/product-can-new.jpeg" alt="Frosted Fawaky Ice Apple can with ice cubes and cold mist" class="ls-showcase-can" width="1400" height="1050" loading="lazy" decoding="async">
             </picture>
             <picture class="ls-float ls-float--nungu" aria-hidden="true">
               <source srcset="/assets/df010659-d1be-4823-9680-d7c3e138cf5f.webp" type="image/webp">
@@ -522,7 +667,7 @@
             </picture>
           </div>
           <div class="ls-showcase-copy">
-            <span class="ls-tag-star"><span class="material-symbols-outlined ls-tag-ico" style="font-variation-settings:'FILL' 1;" aria-hidden="true">ac_unit</span>Freshly Chilled</span>
+            <span class="ls-tag-star"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M22 11h-4.17l3.24-3.24-1.41-1.42L15 11h-2V9l4.66-4.66-1.42-1.41L13 6.17V2h-2v4.17L7.76 2.93 6.34 4.34 11 9v2H9L4.34 6.34 2.93 7.76 6.17 11H2v2h4.17l-3.24 3.24 1.41 1.42L9 13h2v2l-4.66 4.66 1.42 1.41L11 17.83V22h2v-4.17l3.24 3.24 1.42-1.41L13 15v-2h2l4.66 4.66 1.41-1.42L17.83 13H22v-2z"/></svg>Freshly Chilled</span>
             <h2 class="ls-heading ls-heading-white">Straight From<br>the Cooler</h2>
             <p class="ls-subtext ls-subtext-white">A creamy swirl of real Nungu pulp — frosted, splashing, and impossible to resist. This is refreshment you can feel.</p>
             <a href="https://wa.me/917204006560" class="ls-btn-whatsapp ls-btn-whatsapp-lg" target="_blank" rel="noopener">
@@ -561,8 +706,8 @@
           </button>
           <button class="ls-reel" role="listitem" aria-label="Play reel: chilled product">
             <picture>
-              <source srcset="/assets/0877bdbc-dd73-4b40-8724-a7de28cd0f7d.webp" type="image/webp">
-              <img src="/assets/0877bdbc-dd73-4b40-8724-a7de28cd0f7d.png" alt="Fawaky Ice Apple Juice can chilled" width="1024" height="1536" loading="lazy" decoding="async">
+              <source srcset="/assets/product-can-new.jpeg" type="image/webp">
+              <img src="/assets/product-can-new.jpeg" alt="Fawaky Ice Apple Juice can chilled" width="1024" height="1536" loading="lazy" decoding="async">
             </picture>
             <span class="ls-reel-play" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
             <span class="ls-reel-cap">@naturalsfawaky</span>
@@ -597,9 +742,8 @@
         </div>
         <div class="ls-social-grid">
           <div class="ls-social-tile">
-            <picture>
-              <source srcset="/assets/social-violet.webp" type="image/webp">
-              <img class="ls-social-img" src="/assets/social-violet.jpeg" alt="Fawaky Ice Apple can with ice apple fruit on violet" width="1400" height="1050" loading="lazy" decoding="async">
+                        <picture>
+              <img class="ls-social-img" src="/assets/03ba4d14-eb39-468c-ab8a-725a46e096a8.png" alt="Fawaky Ice Apple can with fruits" width="1400" height="1050" loading="lazy" decoding="async">
             </picture>
             <div class="ls-social-overlay" aria-hidden="true">
               <svg class="ls-social-heart" width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
@@ -608,8 +752,7 @@
           </div>
           <div class="ls-social-tile">
             <picture>
-              <source srcset="/assets/da1d7386-1b8a-421d-b31f-76361450874f.webp" type="image/webp">
-              <img class="ls-social-img" src="/assets/da1d7386-1b8a-421d-b31f-76361450874f.png" alt="Ice Apple Nungu fruits with a fresh splash" width="1448" height="1086" loading="lazy" decoding="async">
+              <img class="ls-social-img" src="/assets/4c89619e-9937-463a-afef-5cbf7f083339.webp" alt="Fawaky Ice Apple" width="1448" height="1086" loading="lazy" decoding="async">
             </picture>
             <div class="ls-social-overlay" aria-hidden="true">
               <svg class="ls-social-heart" width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
@@ -672,43 +815,64 @@
       <div class="ls-inner">
         <div class="ls-section-head">
           <span class="ls-tag ls-tag-dark">Testimonials</span>
-          <h2 class="ls-heading">What People Are Saying</h2>
-          <p class="ls-subtext">Real customers, real refreshment.</p>
+          <h2 class="ls-heading">What People Say About Our Product</h2>
+          <p class="ls-subtext">Trusted by healthcare professionals, industry experts and food lovers alike.</p>
         </div>
-        <div class="ls-reviews-grid">
-          <div class="ls-review-card">
-            <div class="ls-review-stars">★★★★★</div>
-            <p class="ls-review-text">"Refreshing and unique. Nothing like it in the market! The chewy jelly texture makes it so special."</p>
+
+        <div class="ls-reviews-grid ls-reviews-grid-pro">
+
+          <article class="ls-review-card ls-review-card-pro">
+            <svg class="ls-review-quote" viewBox="0 0 48 48" fill="currentColor" aria-hidden="true">
+              <path d="M14 8C8.5 8 4 12.5 4 18v14c0 4.4 3.6 8 8 8h6c1.1 0 2-.9 2-2V26c0-1.1-.9-2-2-2h-6c-.7 0-1.3-.2-1.9-.5.5-6.5 5.5-11.5 12-12 1.1-.1 2-.9 2-2V6c0-1.1-.9-2-2.1-2C17.5 4.1 14 8 14 8zm22 0c-5.5 0-10 4.5-10 10v14c0 4.4 3.6 8 8 8h6c1.1 0 2-.9 2-2V26c0-1.1-.9-2-2-2h-6c-.7 0-1.3-.2-1.9-.5.5-6.5 5.5-11.5 12-12 1.1-.1 2-.9 2-2V6c0-1.1-.9-2-2.1-2C39.5 4.1 36 8 36 8z"/>
+            </svg>
+
+            <div class="ls-review-badge">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M12 2L4 5v6c0 5.55 3.84 10.74 8 12 4.16-1.26 8-6.45 8-12V5l-8-3zm-1 15l-4-4 1.41-1.41L11 14.17l6.59-6.59L19 9l-8 8z"/>
+              </svg>
+              Verified Reviewer
+            </div>
+
+            <div class="ls-review-stars" aria-label="5 out of 5 stars">★★★★★</div>
+
+            <p class="ls-review-text">Being in healthcare, I usually check ingredient lists. I liked that this Ice Apple milk drink is made with natural ingredients and has no artificial flavours or preservatives. It tasted fresh, light, and genuinely refreshing.</p>
+
             <div class="ls-reviewer">
-              <div class="ls-reviewer-avatar">R</div>
-              <div>
-                <div class="ls-reviewer-name">Ravi K.</div>
-                <div class="ls-reviewer-role">Regular Customer</div>
+              <div class="ls-reviewer-avatar" aria-hidden="true">HS</div>
+              <div class="ls-reviewer-meta">
+                <div class="ls-reviewer-name">Dr. Hisham Sheikh</div>
+                <div class="ls-reviewer-credential">MBBS, MS ENT (Resident)</div>
+                <div class="ls-reviewer-role">Healthcare Professional</div>
               </div>
             </div>
-          </div>
-          <div class="ls-review-card">
-            <div class="ls-review-stars">★★★★★</div>
-            <p class="ls-review-text">"My kids absolutely love it. Finally a natural drink I can trust — no junk, just pure fruit goodness."</p>
+          </article>
+
+          <article class="ls-review-card ls-review-card-pro">
+            <svg class="ls-review-quote" viewBox="0 0 48 48" fill="currentColor" aria-hidden="true">
+              <path d="M14 8C8.5 8 4 12.5 4 18v14c0 4.4 3.6 8 8 8h6c1.1 0 2-.9 2-2V26c0-1.1-.9-2-2-2h-6c-.7 0-1.3-.2-1.9-.5.5-6.5 5.5-11.5 12-12 1.1-.1 2-.9 2-2V6c0-1.1-.9-2-2.1-2C17.5 4.1 14 8 14 8zm22 0c-5.5 0-10 4.5-10 10v14c0 4.4 3.6 8 8 8h6c1.1 0 2-.9 2-2V26c0-1.1-.9-2-2-2h-6c-.7 0-1.3-.2-1.9-.5.5-6.5 5.5-11.5 12-12 1.1-.1 2-.9 2-2V6c0-1.1-.9-2-2.1-2C39.5 4.1 36 8 36 8z"/>
+            </svg>
+
+            <div class="ls-review-badge">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M12 2L4 5v6c0 5.55 3.84 10.74 8 12 4.16-1.26 8-6.45 8-12V5l-8-3zm-1 15l-4-4 1.41-1.41L11 14.17l6.59-6.59L19 9l-8 8z"/>
+              </svg>
+              Verified Reviewer
+            </div>
+
+            <div class="ls-review-stars" aria-label="5 out of 5 stars">★★★★★</div>
+
+            <p class="ls-review-text">I genuinely like how thick and tasty Fawaky Naturals' tender Ice Apple and other fruit juices are. Unlike many brands that taste watered down, these have a rich taste that really stands out. It's clear they haven't compromised on quality — it's rare to find a brand that offers such great taste and value.</p>
+
             <div class="ls-reviewer">
-              <div class="ls-reviewer-avatar">P</div>
-              <div>
-                <div class="ls-reviewer-name">Priya M.</div>
-                <div class="ls-reviewer-role">Mother of 2</div>
+              <div class="ls-reviewer-avatar" aria-hidden="true">H</div>
+              <div class="ls-reviewer-meta">
+                <div class="ls-reviewer-name">Hashim</div>
+                <div class="ls-reviewer-credential">Operations Manager</div>
+                <div class="ls-reviewer-role">Food Industry Professional</div>
               </div>
             </div>
-          </div>
-          <div class="ls-review-card">
-            <div class="ls-review-stars">★★★★★</div>
-            <p class="ls-review-text">"We stock Fawaky in our café — customers keep coming back asking for more. Premium product, great for business."</p>
-            <div class="ls-reviewer">
-              <div class="ls-reviewer-avatar">A</div>
-              <div>
-                <div class="ls-reviewer-name">Arjun S.</div>
-                <div class="ls-reviewer-role">Café Owner</div>
-              </div>
-            </div>
-          </div>
+          </article>
+
         </div>
       </div>
     </section>
@@ -718,24 +882,25 @@
       <div class="ls-inner">
         <div class="ls-wholesale-inner">
           <div class="ls-wholesale-copy">
-          <span class="ls-tag-star"><span class="material-symbols-outlined ls-tag-ico" style="font-variation-settings:'FILL' 1;" aria-hidden="true">storefront</span>B2B Supply</span>
+          <span class="ls-tag-star"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20 4H4v2L2 11v1h2v8h14v-8h2v-1L18 6V4zm-4 14H8v-5h8v5zm2.83-7H5.17l1.2-3h11.26l1.2 3z"/></svg>B2B Supply</span>
           <h2 class="ls-heading ls-heading-white">Stock Fawaky Naturals<br>in Your Café</h2>
           <p class="ls-subtext ls-subtext-white">We supply cafés, restaurants, cloud kitchens, and bulk buyers. Premium product, reliable supply, dedicated B2B support.</p>
+          <p class="ls-wholesale-company">Company: Fawaky Naturals Pvt Ltd.</p>
           <div class="ls-wholesale-benefits">
             <div class="ls-benefit-pill">
-              <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;" aria-hidden="true">local_offer</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58.55 0 1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41 0-.55-.23-1.06-.59-1.42zM5.5 7C4.67 7 4 6.33 4 5.5S4.67 4 5.5 4 7 4.67 7 5.5 6.33 7 5.5 7z"/></svg>
               Bulk Pricing
             </div>
             <div class="ls-benefit-pill">
-              <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;" aria-hidden="true">local_shipping</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20 8h-3V4H3c-1.1 0-2 .9-2 2v11h2c0 1.66 1.34 3 3 3s3-1.34 3-3h6c0 1.66 1.34 3 3 3s3-1.34 3-3h2v-5l-3-4zm-17 1h13v4H3V9zm3 8.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm13.5-9l1.96 2.5H17V8.5h2.5zm-1.5 9c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
               Regular Delivery
             </div>
             <div class="ls-benefit-pill">
-              <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;" aria-hidden="true">support_agent</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17.93V18c0-.55-.45-1-1-1s-1 .45-1 1v1.93C7.06 19.48 4.52 16.94 4.07 14H6c.55 0 1-.45 1-1s-.45-1-1-1H4.07C4.52 9.06 7.06 6.52 10 6.07V8c0 .55.45 1 1 1s1-.45 1-1V6.07C15.94 6.52 18.48 9.06 18.93 12H17c-.55 0-1 .45-1 1s.45 1 1 1h1.93c-.45 2.94-2.99 5.48-5.93 5.93zM12 10c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
               B2B Support
             </div>
             <div class="ls-benefit-pill">
-              <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;" aria-hidden="true">inventory_2</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.54 5.23l-1.39-1.68C18.88 3.21 18.47 3 18 3H6c-.47 0-.88.21-1.16.55L3.46 5.23C3.17 5.57 3 6.02 3 6.5V19c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6.5c0-.48-.17-.93-.46-1.27zM12 17.5L6.5 12H10v-2h4v2h3.5L12 17.5zM5.12 5l.82-1h12l.93 1H5.12z"/></svg>
               Custom Packaging
             </div>
           </div>
@@ -746,15 +911,15 @@
           </div>
           <div class="ls-wholesale-card">
             <div class="ls-wholesale-stat">
-              <span class="ls-wholesale-stat-num"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;" aria-hidden="true">verified</span></span>
+              <span class="ls-wholesale-stat-num"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg></span>
               <span class="ls-wholesale-stat-lbl">Trusted by cafés &amp; restaurants</span>
             </div>
             <div class="ls-wholesale-stat">
-              <span class="ls-wholesale-stat-num"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;" aria-hidden="true">eco</span></span>
+              <span class="ls-wholesale-stat-num"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6.05 8.24C4.27 9.86 3 12.04 3 14.5 3 18.64 6.36 22 10.5 22c2.17 0 4.14-.9 5.55-2.34l-9-11.42zM12 2c-.55 0-1 .45-1 1s.45 1 1 1c3.31 0 6 2.69 6 6 0 .55.45 1 1 1s1-.45 1-1c0-4.42-3.58-8-8-8zm0 4c-.55 0-1 .45-1 1s.45 1 1 1c1.1 0 2 .9 2 2 0 .55.45 1 1 1s1-.45 1-1c0-2.21-1.79-4-4-4zm.5 5.5c-.83 0-1.5.67-1.5 1.5v4.26l3.95 2.28.75-1.3-3.2-1.84V12.5c0-.83-.67-1.5-1-1z"/></svg></span>
               <span class="ls-wholesale-stat-lbl">Purely natural ingredients</span>
             </div>
             <div class="ls-wholesale-stat">
-              <span class="ls-wholesale-stat-num"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;" aria-hidden="true">support_agent</span></span>
+              <span class="ls-wholesale-stat-num"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17.93V18c0-.55-.45-1-1-1s-1 .45-1 1v1.93C7.06 19.48 4.52 16.94 4.07 14H6c.55 0 1-.45 1-1s-.45-1-1-1H4.07C4.52 9.06 7.06 6.52 10 6.07V8c0 .55.45 1 1 1s1-.45 1-1V6.07C15.94 6.52 18.48 9.06 18.93 12H17c-.55 0-1 .45-1 1s.45 1 1 1h1.93c-.45 2.94-2.99 5.48-5.93 5.93zM12 10c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg></span>
               <span class="ls-wholesale-stat-lbl">Dedicated B2B support</span>
             </div>
           </div>
@@ -768,24 +933,29 @@
         <div class="ls-section-head">
           <span class="ls-tag ls-tag-dark">Questions</span>
           <h2 class="ls-heading">Frequently Asked</h2>
+          <p class="ls-subtext">Everything you need to know about Fawaky Naturals.</p>
         </div>
         <div class="ls-faq-list">
-          <details class="ls-faq-item">
-            <summary class="ls-faq-q">Is Fawaky completely natural?<span class="material-symbols-outlined ls-faq-ico" aria-hidden="true">expand_more</span></summary>
-            <p class="ls-faq-a">Yes. No artificial colours, no preservatives, no essences — just real Ice Apple (Nungu). Pure tropical refreshment.</p>
-          </details>
-          <details class="ls-faq-item">
-            <summary class="ls-faq-q">Does it contain added sugar or preservatives?<span class="material-symbols-outlined ls-faq-ico" aria-hidden="true">expand_more</span></summary>
-            <p class="ls-faq-a">No preservatives, ever. Most of the sweetness comes from the real fruit itself — we add just a light touch of sugar to balance the taste, and nothing more.</p>
-          </details>
-          <details class="ls-faq-item">
-            <summary class="ls-faq-q">How should I store it?<span class="material-symbols-outlined ls-faq-ico" aria-hidden="true">expand_more</span></summary>
-            <p class="ls-faq-a">Keep chilled and refrigerate after opening. Best served cold, straight from the cooler.</p>
-          </details>
-          <details class="ls-faq-item">
-            <summary class="ls-faq-q">How do I order, and do you supply cafés?<span class="material-symbols-outlined ls-faq-ico" aria-hidden="true">expand_more</span></summary>
-            <p class="ls-faq-a">Order any time on WhatsApp. For bulk and café / restaurant supply, message us for B2B pricing and regular delivery.</p>
-          </details>
+          <div class="ls-faq-item">
+            <button class="ls-faq-q" aria-expanded="false">Is Fawaky completely natural?<svg class="ls-faq-ico" aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
+            <div class="ls-faq-body"><p class="ls-faq-a">Yes. No artificial colours, no preservatives, no essences — just real Ice Apple (Nungu). Pure tropical refreshment, nothing to hide.</p></div>
+          </div>
+          <div class="ls-faq-item">
+            <button class="ls-faq-q" aria-expanded="false">Does it contain added sugar or preservatives?<svg class="ls-faq-ico" aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
+            <div class="ls-faq-body"><p class="ls-faq-a">No preservatives, ever. Most of the sweetness comes from the real fruit itself — we add just a light touch of sugar to balance the taste, and nothing more.</p></div>
+          </div>
+          <div class="ls-faq-item">
+            <button class="ls-faq-q" aria-expanded="false">Is it suitable for kids?<svg class="ls-faq-ico" aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
+            <div class="ls-faq-body"><p class="ls-faq-a">Absolutely. Fawaky is made for all ages — families, kids, teens, and adults. No artificial anything means it's a drink the whole family can enjoy together.</p></div>
+          </div>
+          <div class="ls-faq-item">
+            <button class="ls-faq-q" aria-expanded="false">How should I serve it?<svg class="ls-faq-ico" aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
+            <div class="ls-faq-body"><p class="ls-faq-a">Best served chilled, straight from the cooler. Shake gently before opening. Pour over ice for an extra refreshing experience.</p></div>
+          </div>
+          <div class="ls-faq-item">
+            <button class="ls-faq-q" aria-expanded="false">How do I order, and do you supply cafés?<svg class="ls-faq-ico" aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
+            <div class="ls-faq-body"><p class="ls-faq-a">Order any time on WhatsApp. For bulk and café / restaurant supply, message us for B2B pricing and regular delivery — we're dedicated to supporting local businesses.</p></div>
+          </div>
         </div>
       </div>
     </section>
@@ -797,7 +967,7 @@
           <div class="ls-trust-copy">
             <span class="ls-tag">Our Promise</span>
             <h2 class="ls-heading">Refreshment You<br>Can Feel</h2>
-            <p class="ls-subtext ls-subtext-white">Every bottle is crafted to deliver a refreshing tropical experience inspired by nature's most loved summer fruits.</p>
+            <p class="ls-subtext ls-subtext-white">Every bottle is crafted to deliver a refreshing tropical experience inspired by nature's most loved tropical fruits.</p>
           </div>
           <ul class="ls-trust-list" role="list">
             <li class="ls-trust-item"><span class="ls-trust-check" aria-hidden="true">✓</span>Naturally Hydrating</li>
@@ -816,7 +986,7 @@
       <div class="ls-footer-inner">
         <div class="ls-footer-top">
           <div class="ls-footer-brand-col">
-            <div class="ls-footer-brand">Fawaky Naturals Pvt. Ltd.</div>
+            <div class="ls-footer-brand">Fawaky Naturals Pvt Ltd.</div>
             <p class="ls-footer-tagline">Refreshment Reimagined.</p>
             <div class="ls-footer-social">
               <a href="#" aria-label="Instagram" class="ls-social-link" target="_blank" rel="noopener">
@@ -837,7 +1007,7 @@
           <nav class="ls-footer-nav">
             <h4 class="ls-footer-nav-title">Explore</h4>
             <a href="#about">Our Story</a>
-            <a href="#bestseller">Bestseller</a>
+            <a href="#bestseller">Our Drink</a>
             <a href="#faq">FAQ</a>
             <a href="#wholesale">Wholesale</a>
           </nav>
@@ -850,7 +1020,8 @@
           </nav>
         </div>
         <div class="ls-footer-bottom">
-          <p class="ls-footer-copy">© 2025 Fawaky Naturals Pvt. Ltd. All rights reserved.</p>
+          <p class="ls-footer-copy">© 2026 Fawaky Naturals Pvt Ltd. All Rights Reserved.</p>
+          <p class="ls-footer-registered">Fawaky Naturals is a registered brand of Fawaky Naturals Pvt Ltd.</p>
           <p class="ls-footer-made">Naturally Cool. Exceptionally Premium.</p>
         </div>
       </div>

@@ -14,7 +14,7 @@ let lastFrame = -1;
 let looping = false;
 
 const canvas = document.getElementById('animation-canvas');
-const ctx = canvas.getContext('2d');
+const ctx = canvas ? canvas.getContext('2d') : null;
 const scrollContainer = document.getElementById('scroll-container');
 
 function framePath(i) {
@@ -34,17 +34,16 @@ function preload(onProgress, onDone) {
   }
 }
 
-preload(
-  (p) => {
-    const pct = Math.round(p * 100);
-    document.getElementById('preloader-progress').style.width = pct + '%';
-  },
-  () => {
-    const el = document.getElementById('preloader');
+// Canvas section removed — skip 240-frame preload, dismiss immediately
+{
+  const el = document.getElementById('preloader');
+  if (el) {
     el.classList.add('fade-out');
     setTimeout(() => { el.classList.add('hidden'); initApp(); }, 700);
+  } else {
+    initApp();
   }
-);
+}
 
 function resizeCanvas() {
   canvas.width  = window.innerWidth  * window.devicePixelRatio;
@@ -55,6 +54,7 @@ function resizeCanvas() {
 }
 
 function drawFrame(idx) {
+  if (!canvas || !ctx) return;
   if (idx === lastFrame) return;
   lastFrame = idx;
   const img = images[idx - 1];
