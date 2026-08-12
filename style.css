@@ -3694,7 +3694,7 @@ button:focus-visible,
   font-family: 'Inter', sans-serif;
   font-size: clamp(18px, 2.2vw, 26px);
   font-weight: 600;
-  color: #F6F1EA;
+  color: var(--fw-green);
   max-width: 640px;
   margin: 0 auto 20px;
   line-height: 1.4;
@@ -3702,10 +3702,6 @@ button:focus-visible,
   text-transform: uppercase;
   text-shadow: 0 1px 10px rgba(0,0,0,0.5);
   text-wrap: balance;
-}
-
-.vh-green {
-  color: #92B83D;
 }
 
 .vh-sub {
