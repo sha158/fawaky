@@ -3595,7 +3595,7 @@ button:focus-visible,
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  background: #0a001a;
+  background: var(--fw-plum);
 }
 
 .vh-video {
