@@ -171,16 +171,8 @@ function initFaqAccordion() {
 
 /* ─── Entry ─────────────────────────────────────────────────── */
 function initVideoHero() {
-  const isMobile    = window.innerWidth <= 768;
-  const videoDesktop = document.getElementById('vh-video');
-  const videoMobile  = document.getElementById('vh-video-mobile');
-  const activeVideo  = isMobile ? videoMobile : videoDesktop;
-  const idleVideo    = isMobile ? videoDesktop : videoMobile;
+  const video = document.getElementById('vh-video');
   const content = document.querySelector('.vh-content');
-
-  if (!activeVideo) return;
-
-  if (idleVideo) { idleVideo.pause(); }
 
   function forcePlay(v) {
     if (!v) return;
@@ -189,11 +181,13 @@ function initVideoHero() {
     });
   }
 
-  forcePlay(activeVideo);
+  if (video) {
+    forcePlay(video);
 
-  document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible') forcePlay(activeVideo);
-  });
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') forcePlay(video);
+    });
+  }
 
   if (typeof gsap !== 'undefined' && content) {
     gsap.from('.vh-heading',  { opacity: 0, y: 28, duration: 1,   ease: 'power3.out', delay: 0.2  });
