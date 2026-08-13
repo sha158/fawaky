@@ -669,15 +669,20 @@ function initScrollSpy() {
 }
 
 function initApp() {
-  resizeCanvas();
-  drawFrame(1);
-  window.addEventListener('resize', resizeCanvas);
+  // The canvas hero was replaced by the video hero, so #animation-canvas and
+  // #scroll-container are gone. Wiring their machinery against null threw out
+  // of initApp and killed everything below it -- including motion-fx.
+  if (canvas && scrollContainer) {
+    resizeCanvas();
+    drawFrame(1);
+    window.addEventListener('resize', resizeCanvas);
 
-  window.addEventListener('scroll', () => {
-    const frac = getScrollFraction();
-    targetFrame = Math.round(frac * (frameCount - 1)) + 1;
-    if (!looping) { looping = true; requestAnimationFrame(tick); }
-  }, { passive: true });
+    window.addEventListener('scroll', () => {
+      const frac = getScrollFraction();
+      targetFrame = Math.round(frac * (frameCount - 1)) + 1;
+      if (!looping) { looping = true; requestAnimationFrame(tick); }
+    }, { passive: true });
+  }
 
   initMobileNav();
   initReels();

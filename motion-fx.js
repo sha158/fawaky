@@ -171,7 +171,8 @@ function initFaqAccordion() {
 
 /* ─── Entry ─────────────────────────────────────────────────── */
 function initVideoHero() {
-  const video = document.getElementById('vh-video');
+  const videoDesktop = document.getElementById('vh-video');
+  const videoMobile  = document.getElementById('vh-video-mobile');
   const content = document.querySelector('.vh-content');
 
   function forcePlay(v) {
@@ -181,13 +182,33 @@ function initVideoHero() {
     });
   }
 
-  if (video) {
-    forcePlay(video);
+  // The two videos are orientation-matched, and both ship with preload="none"
+  // and no autoplay. Only the one this viewport shows gets opted into loading,
+  // so the other file is never fetched.
+  function activate() {
+    const isMobile = window.innerWidth <= 768;
+    const active = isMobile ? videoMobile : videoDesktop;
+    const idle   = isMobile ? videoDesktop : videoMobile;
 
-    document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'visible') forcePlay(video);
-    });
+    if (!active) return;
+    if (idle) idle.pause();
+
+    if (active.preload !== 'auto') active.preload = 'auto';
+    forcePlay(active);
   }
+
+  activate();
+
+  // Crossing the 768px breakpoint reveals a video that has never loaded.
+  let resizeTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(activate, 200);
+  });
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') activate();
+  });
 
   if (typeof gsap !== 'undefined' && content) {
     gsap.from('.vh-heading',  { opacity: 0, y: 28, duration: 1,   ease: 'power3.out', delay: 0.2  });

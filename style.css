@@ -3595,7 +3595,7 @@ button:focus-visible,
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  background: var(--fw-plum);
+  background: #0a001a;
 }
 
 .vh-video {
@@ -3608,6 +3608,8 @@ button:focus-visible,
   z-index: 0;
 }
 
+.vh-video-mobile { opacity: 0; pointer-events: none; }
+
 @media (max-width: 768px) {
   #video-hero {
     height: 100vh;
@@ -3617,6 +3619,13 @@ button:focus-visible,
     display: flex;
     align-items: flex-end;
     justify-content: center;
+  }
+  .vh-video-desktop { opacity: 0; pointer-events: none; }
+  .vh-video-mobile {
+    opacity: 1;
+    pointer-events: none;
+    object-fit: cover;
+    object-position: center center;
   }
   #video-hero .vh-content {
     position: absolute;
