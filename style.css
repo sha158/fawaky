@@ -1745,15 +1745,20 @@ a.ls-contact-row:hover .ls-contact-ico { color: #ffffff; }
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 4px;
+  /* Must exceed the ~6.5px of whitespace between wrapped lines, or paragraph
+     breaks read as tighter than the lines inside a paragraph. */
+  gap: 10px;
 }
+
+/* Brand voice, not legal copy — set it apart from the © / CIN / brand group. */
+.ls-footer-made { margin-top: 6px; }
 
 .ls-footer-copy,
 .ls-footer-made,
 .ls-footer-registered {
   font-family: var(--font-body);
   font-size: var(--fs-xs);
-  color: rgba(255,255,255,0.35);
+  color: rgba(255,255,255,0.5);
   line-height: 1.5;
 }
 
@@ -1985,7 +1990,7 @@ a.ls-contact-row:hover .ls-contact-ico { color: #ffffff; }
   .ls-footer-brand-col { grid-column: auto; }
   .ls-footer-contact { grid-column: auto; }
 
-  .ls-footer-bottom { flex-direction: column; text-align: center; }
+  .ls-footer-bottom { text-align: left; }
 
   .ls-stats-row { gap: 8px; }
 }
