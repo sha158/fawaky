@@ -1713,6 +1713,25 @@ a {
 
 /* <address> is the right element for the registered contact block, but browsers
    italicise it by default — reset that and match the column's link treatment. */
+.ls-contact-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+/* Icon sits against the first line of text, not centred against the whole
+   block -- the address runs five lines. */
+.ls-contact-ico {
+  flex: 0 0 auto;
+  width: 16px;
+  height: 16px;
+  margin-top: 3px;
+  color: rgba(255,255,255,0.45);
+  transition: color 0.2s;
+}
+
+a.ls-contact-row:hover .ls-contact-ico { color: #ffffff; }
+
 .ls-footer-address {
   font-family: var(--font-body);
   font-style: normal;
