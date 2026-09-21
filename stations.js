@@ -3,9 +3,11 @@
    is near the viewport, so visitors who never scroll this far cost nothing. */
 
 import { STATIONS, MAP_CENTER, MAP_ZOOM, FOCUS_ZOOM, directionsUrl } from './stations-data.js';
+// Imported, not a runtime '/assets/...' string: that way Vite emits and hashes
+// the file. A bare path resolves in dev but 404s in the production build.
+import PIN from './assets/map-pin.png';
 
 const API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
-const PIN = '/assets/map-pin.png';
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 /* Light basemap, decluttered and nudged toward the brand. Inline styles work
