@@ -2,7 +2,9 @@
    Loaded lazily from main.js: the Maps script is only fetched once the section
    is near the viewport, so visitors who never scroll this far cost nothing. */
 
-import { STATIONS, MAP_CENTER, MAP_ZOOM, FOCUS_ZOOM, directionsUrl } from './stations-data.js';
+import {
+  STATIONS, MAP_CENTER, MAP_ZOOM, FOCUS_ZOOM, directionsUrl, nearestStation,
+} from './stations-data.js';
 // Imported, not a runtime '/assets/...' string: that way Vite emits and hashes
 // the file. A bare path resolves in dev but 404s in the production build.
 import PIN from './assets/map-pin.png';
@@ -52,6 +54,90 @@ function loadMapsApi() {
   return loaderPromise;
 }
 
+/* ─── Visitor location ─────────────────────────────────── */
+
+let positionPromise = null;
+
+/* Resolves {lat,lng} or null. Never rejects — a missing location is an ordinary
+   outcome here, not an error. Runs at most once per page load. */
+function getPosition() {
+  if (positionPromise) return positionPromise;
+
+  positionPromise = (async () => {
+    if (!navigator.geolocation) return null;
+
+    // Ask the Permissions API first. If the visitor already said no, we must not
+    // call getCurrentPosition -- that is what re-triggers the prompt on every
+    // expand. Not every browser implements this, hence the try.
+    try {
+      const status = await navigator.permissions.query({ name: 'geolocation' });
+      if (status.state === 'denied') return null;
+    } catch { /* Permissions API unavailable — fall through and just ask */ }
+
+    return new Promise((resolve) => {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+        () => resolve(null), // denied, unavailable or timed out — all the same to us
+        // A café locator does not need GPS precision, and low accuracy is far
+        // faster and kinder to battery.
+        { enableHighAccuracy: false, timeout: 8000, maximumAge: 300000 },
+      );
+    });
+  })();
+
+  return positionPromise;
+}
+
+/* ─── Route ────────────────────────────────────────────── */
+
+const ROUTE_LINE = { color: '#5E1F78', casing: '#FFFFFF' };
+const routeCache = new Map(); // station.id -> {path, distance, duration}
+let directionsService = null;
+let quotaExhausted = false;
+
+/* Resolves {path, distance, duration} or null. Billed per call, so results are
+   cached per station and never retried on quota errors. */
+function fetchRoute(origin, station) {
+  if (quotaExhausted) return Promise.resolve(null);
+  if (routeCache.has(station.id)) return Promise.resolve(routeCache.get(station.id));
+
+  directionsService = directionsService || new google.maps.DirectionsService();
+
+  return new Promise((resolve) => {
+    directionsService.route({
+      origin,
+      destination: { lat: station.lat, lng: station.lng },
+      travelMode: 'DRIVING',
+    }, (result, status) => {
+      if (status === 'OK' && result.routes[0]) {
+        const route = result.routes[0];
+        const leg = route.legs[0];
+        const data = {
+          path: route.overview_path,
+          bounds: route.bounds,
+          distance: leg && leg.distance ? leg.distance.text : '',
+          duration: leg && leg.duration ? leg.duration.text : '',
+        };
+        routeCache.set(station.id, data);
+        resolve(data);
+        return;
+      }
+
+      if (status === 'REQUEST_DENIED') {
+        console.warn('[fawaky] Directions request denied. Enable the Directions API in Google Cloud Console and add it to this key\'s API restrictions.');
+      } else if (status === 'OVER_QUERY_LIMIT') {
+        // Never retry a billed endpoint in a loop.
+        quotaExhausted = true;
+        console.warn('[fawaky] Directions quota exhausted — routing disabled for this session.');
+      } else if (status !== 'ZERO_RESULTS') {
+        console.warn('[fawaky] Directions failed:', status);
+      }
+      routeCache.set(station.id, null);
+      resolve(null);
+    });
+  });
+}
+
 /* ─── List ─────────────────────────────────────────────── */
 
 function renderList(listEl, onSelect) {
@@ -96,6 +182,7 @@ function buildCard(stage) {
     <span class="ls-station-card-handle" aria-hidden="true"></span>
     <h3 class="ls-station-card-name"></h3>
     <p class="ls-station-card-area"></p>
+    <p class="ls-station-card-route" hidden></p>
     <a class="ls-station-card-cta" target="_blank" rel="noopener">Get Directions</a>`;
   stage.appendChild(card);
 
@@ -105,10 +192,21 @@ function buildCard(stage) {
   return {
     el: card,
     close,
-    show(station) {
+    show(station, route) {
       card.querySelector('.ls-station-card-name').textContent = station.name;
       card.querySelector('.ls-station-card-area').textContent = station.area;
       card.querySelector('.ls-station-card-cta').href = directionsUrl(station);
+
+      // Stays hidden unless a route actually resolved, so the card never shows
+      // an empty row.
+      const routeEl = card.querySelector('.ls-station-card-route');
+      if (route && route.distance && route.duration) {
+        routeEl.textContent = `${route.distance} · ${route.duration} away`;
+        routeEl.hidden = false;
+      } else {
+        routeEl.hidden = true;
+      }
+
       card.hidden = false;
       requestAnimationFrame(() => card.classList.add('is-open'));
     },
@@ -133,7 +231,7 @@ function renderFallback(wrap) {
    the tile being made `position: fixed`. GSAP leaves a residual transform on
    .ls-stations-map-wrap, and a transformed ancestor turns `fixed` into a
    containing-block trap. Reparenting also guarantees we clear the sticky header. */
-function initExpand(map, stage, wrap, refocus) {
+function initExpand(map, stage, wrap, refocus, onExpand, onCollapse) {
   const expandBtn = stage.querySelector('.ls-stations-expand');
   const closeBtn = stage.querySelector('.ls-stations-close');
   if (!expandBtn || !closeBtn) return null;
@@ -160,7 +258,12 @@ function initExpand(map, stage, wrap, refocus) {
     expandBtn.setAttribute('aria-expanded', 'true');
     // Page scroll is no longer behind the map, so one finger should pan it.
     map.setOptions({ gestureHandling: 'greedy' });
-    requestAnimationFrame(() => { refocus('expanded'); closeBtn.focus(); });
+    requestAnimationFrame(() => {
+      refocus('expanded');
+      closeBtn.focus();
+      // Routing runs after the map has re-framed, so fitBounds on the route wins.
+      if (onExpand) onExpand();
+    });
   }
 
   function collapse() {
@@ -173,6 +276,7 @@ function initExpand(map, stage, wrap, refocus) {
     expandBtn.setAttribute('aria-expanded', 'false');
     map.setOptions({ gestureHandling: 'cooperative' });
     stage.classList.remove('is-selected'); // hint returns for the next visit
+    if (onCollapse) onCollapse(); // drop the route so the tile re-frames cleanly
     requestAnimationFrame(() => { refocus('collapsed'); expandBtn.focus(); });
   }
 
@@ -220,6 +324,36 @@ function initMap(mapEl, stage, wrap, rows) {
     map.panTo({ lat: lat - latShift, lng });
   };
 
+  /* Two overlaid lines: a white casing under a brand-purple stroke, so the route
+     stays legible over the pale basemap and the green parks. */
+  let routeLines = [];
+
+  const clearRoute = () => {
+    routeLines.forEach((l) => l.setMap(null));
+    routeLines = [];
+  };
+
+  const drawRoute = (route) => {
+    clearRoute();
+    if (!route || !route.path) return;
+    routeLines = [
+      new google.maps.Polyline({
+        path: route.path, map, strokeColor: ROUTE_LINE.casing,
+        strokeOpacity: 0.9, strokeWeight: 10, zIndex: 1,
+      }),
+      new google.maps.Polyline({
+        path: route.path, map, strokeColor: ROUTE_LINE.color,
+        strokeOpacity: 1, strokeWeight: 5, zIndex: 2,
+      }),
+    ];
+    // Frame the whole route. Without this the line is simply off-screen for any
+    // visitor more than a few hundred metres away. Bottom padding keeps it clear
+    // of the card.
+    if (route.bounds) {
+      map.fitBounds(route.bounds, { top: 72, right: 40, bottom: 220, left: 40 });
+    }
+  };
+
   const select = (station) => {
     const marker = markers.get(station.id);
     focusOn(station.lat, station.lng);
@@ -227,9 +361,26 @@ function initMap(mapEl, stage, wrap, rows) {
       marker.setAnimation(google.maps.Animation.BOUNCE);
       setTimeout(() => marker.setAnimation(null), 700);
     }
-    card.show(station);
+    card.show(station, routeCache.get(station.id));
     setActive(station.id);
     stage.classList.add('is-selected'); // the hint has served its purpose
+  };
+
+  /* Auto-route on expand. Silent whenever the visitor has not granted location or
+     the Directions API is unavailable -- the map simply behaves as it did before. */
+  const maybeRoute = async () => {
+    const origin = await getPosition();
+    if (!origin) return;
+    const station = nearestStation(origin);
+    if (!station) return;
+
+    const route = await fetchRoute(origin, station);
+    if (!route) return;
+
+    drawRoute(route);
+    card.show(station, route);
+    setActive(station.id);
+    stage.classList.add('is-selected');
   };
 
   /* Called by the expand controller once the stage has been reparented, so the map
@@ -273,7 +424,7 @@ function initMap(mapEl, stage, wrap, rows) {
   }
 
   map.addListener('click', card.close);
-  initExpand(map, stage, wrap, refocus);
+  initExpand(map, stage, wrap, refocus, maybeRoute, clearRoute);
 
   return select;
 }

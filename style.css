@@ -4470,3 +4470,21 @@ body.is-map-expanded {
     transition: none;
   }
 }
+
+/* Distance + time to the nearest station, shown only once a route resolves. */
+.ls-station-card-route {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin: -8px 0 14px;
+  font-family: var(--font-body);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  letter-spacing: var(--ls-label);
+  color: #4d7a12; /* --fw-green darkened for contrast on the ivory card */
+}
+
+.ls-station-card-route[hidden] {
+  display: none;
+}
