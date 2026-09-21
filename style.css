@@ -4291,3 +4291,182 @@ button:focus-visible,
     transition: none;
   }
 }
+
+/* ─── Stations: expandable full-screen map ─── */
+
+.ls-stations-stage {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+/* Map controls — expand in the tile, close in the overlay. Same slot, so only
+   one is ever visible. */
+.ls-stations-expand,
+.ls-stations-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(23, 0, 31, 0.78);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(23, 0, 31, 0.3);
+  transition: background 0.3s var(--ease), transform 0.3s var(--ease);
+}
+
+.ls-stations-expand:hover,
+.ls-stations-close:hover {
+  background: var(--ls-primary);
+  transform: scale(1.06);
+}
+
+.ls-stations-close {
+  display: none; /* revealed only inside the overlay */
+}
+
+/* "Tap the pin to get directions" — sits on a light basemap, so it goes dark. */
+.ls-stations-hint {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0;
+  padding: 9px 15px 9px 12px;
+  max-width: calc(100% - 76px);
+  border-radius: 9999px;
+  background: rgba(23, 0, 31, 0.82);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  color: #fff;
+  font-family: var(--font-body);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  line-height: 1.3;
+  box-shadow: 0 6px 18px rgba(23, 0, 31, 0.28);
+  transition: opacity 0.4s var(--ease), transform 0.4s var(--ease);
+}
+
+.ls-stations-hint svg {
+  flex: none;
+  color: var(--fw-green);
+}
+
+/* Once a station is chosen the hint has done its job. */
+.ls-stations-stage.is-selected .ls-stations-hint {
+  opacity: 0;
+  transform: translateY(-6px);
+  pointer-events: none;
+}
+
+/* ─── The overlay ─── */
+
+.ls-stations-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9500; /* over the header (300), under the preloader (9999) */
+  background: var(--ls-primary-dark);
+}
+
+.ls-stations-overlay[hidden] {
+  display: none;
+}
+
+.ls-stations-overlay .ls-stations-stage {
+  width: 100vw;
+  /* dvh, not vh: vh leaves a strip under mobile browser chrome. */
+  height: 100dvh;
+  border-radius: 0;
+}
+
+.ls-stations-overlay .ls-stations-map {
+  width: 100%;
+  height: 100%;
+  border-radius: 0;
+}
+
+.ls-stations-overlay .ls-stations-expand {
+  display: none;
+}
+
+.ls-stations-overlay .ls-stations-close {
+  display: grid;
+  top: calc(14px + env(safe-area-inset-top));
+  right: calc(14px + env(safe-area-inset-right));
+}
+
+.ls-stations-overlay .ls-stations-hint {
+  top: calc(14px + env(safe-area-inset-top));
+  left: calc(14px + env(safe-area-inset-left));
+}
+
+/* The card is a centred sheet in the overlay at every width. */
+.ls-stations-overlay .ls-station-card {
+  left: 50%;
+  right: auto;
+  bottom: calc(18px + env(safe-area-inset-bottom));
+  width: min(420px, calc(100vw - 32px));
+  transform: translate(-50%, 18px);
+  text-align: center;
+}
+
+.ls-stations-overlay .ls-station-card.is-open {
+  transform: translate(-50%, 0);
+}
+
+.ls-stations-overlay .ls-station-card-handle {
+  display: block;
+  width: 38px;
+  height: 4px;
+  margin: -6px auto 12px;
+  border-radius: 9999px;
+  background: rgba(26, 26, 26, 0.18);
+}
+
+/* Lock the page behind the overlay without letting the layout jump when the
+   scrollbar disappears. */
+body.is-map-expanded {
+  overflow: hidden;
+}
+
+@supports (scrollbar-gutter: stable) {
+  body.is-map-expanded {
+    scrollbar-gutter: stable;
+  }
+}
+
+@media (max-width: 768px) {
+  .ls-stations-hint {
+    font-size: var(--fs-2xs);
+    padding: 8px 13px 8px 10px;
+  }
+  .ls-stations-expand,
+  .ls-stations-close {
+    top: 12px;
+    right: 12px;
+  }
+  .ls-stations-hint {
+    top: 12px;
+    left: 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ls-stations-expand,
+  .ls-stations-close,
+  .ls-stations-hint {
+    transition: none;
+  }
+}

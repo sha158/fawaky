@@ -10,6 +10,12 @@ import PIN from './assets/map-pin.png';
 const API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+/* How far to lift the marker above the bottom sheet, in pixels. The sheet covers a
+   very different share of a 380px tile than of a full viewport, so the two modes
+   need their own value. Both are empirical -- confirm by screenshot when changing
+   them, since a computed sheetHeight/2 measured wrong in practice. */
+const OFFSET_PX = { collapsed: 55, expanded: 120 };
+
 /* Light basemap, decluttered and nudged toward the brand. Inline styles work
    because we use the classic Marker — an AdvancedMarkerElement would need a
    cloud Map ID and would make this array a no-op. */
@@ -81,7 +87,7 @@ function renderList(listEl, onSelect) {
 
 /* ─── Selected-station card ────────────────────────────── */
 
-function buildCard(wrap) {
+function buildCard(stage) {
   const card = document.createElement('div');
   card.className = 'ls-station-card';
   card.hidden = true;
@@ -91,7 +97,7 @@ function buildCard(wrap) {
     <h3 class="ls-station-card-name"></h3>
     <p class="ls-station-card-area"></p>
     <a class="ls-station-card-cta" target="_blank" rel="noopener">Get Directions</a>`;
-  wrap.appendChild(card);
+  stage.appendChild(card);
 
   const close = () => { card.hidden = true; card.classList.remove('is-open'); };
   card.querySelector('.ls-station-card-close').addEventListener('click', close);
@@ -121,9 +127,64 @@ function renderFallback(wrap) {
     </div>`).join('');
 }
 
+/* ─── Expand to full screen ────────────────────────────── */
+
+/* The stage (map + card + controls) is reparented into a fixed overlay rather than
+   the tile being made `position: fixed`. GSAP leaves a residual transform on
+   .ls-stations-map-wrap, and a transformed ancestor turns `fixed` into a
+   containing-block trap. Reparenting also guarantees we clear the sticky header. */
+function initExpand(map, stage, wrap, refocus) {
+  const expandBtn = stage.querySelector('.ls-stations-expand');
+  const closeBtn = stage.querySelector('.ls-stations-close');
+  if (!expandBtn || !closeBtn) return null;
+
+  const overlay = document.createElement('div');
+  overlay.className = 'ls-stations-overlay';
+  overlay.setAttribute('role', 'dialog');
+  overlay.setAttribute('aria-modal', 'true');
+  overlay.setAttribute('aria-label', 'Fawaky Stations map');
+  overlay.hidden = true;
+  document.body.appendChild(overlay);
+
+  let open = false;
+
+  const onKey = (e) => { if (e.key === 'Escape') collapse(); };
+
+  function expand() {
+    if (open) return;
+    open = true;
+    overlay.hidden = false;
+    overlay.appendChild(stage);
+    document.body.classList.add('is-map-expanded');
+    document.addEventListener('keydown', onKey);
+    expandBtn.setAttribute('aria-expanded', 'true');
+    // Page scroll is no longer behind the map, so one finger should pan it.
+    map.setOptions({ gestureHandling: 'greedy' });
+    requestAnimationFrame(() => { refocus('expanded'); closeBtn.focus(); });
+  }
+
+  function collapse() {
+    if (!open) return;
+    open = false;
+    wrap.appendChild(stage);
+    overlay.hidden = true;
+    document.body.classList.remove('is-map-expanded');
+    document.removeEventListener('keydown', onKey);
+    expandBtn.setAttribute('aria-expanded', 'false');
+    map.setOptions({ gestureHandling: 'cooperative' });
+    stage.classList.remove('is-selected'); // hint returns for the next visit
+    requestAnimationFrame(() => { refocus('collapsed'); expandBtn.focus(); });
+  }
+
+  expandBtn.addEventListener('click', expand);
+  closeBtn.addEventListener('click', collapse);
+
+  return { expand, collapse, isOpen: () => open };
+}
+
 /* ─── Map ──────────────────────────────────────────────── */
 
-function initMap(mapEl, wrap, rows) {
+function initMap(mapEl, stage, wrap, rows) {
   const map = new google.maps.Map(mapEl, {
     center: MAP_CENTER,
     zoom: MAP_ZOOM,
@@ -136,37 +197,57 @@ function initMap(mapEl, wrap, rows) {
     clickableIcons: false,
   });
 
-  const card = buildCard(wrap);
+  const card = buildCard(stage);
   const markers = new Map();
+  let expanded = false;
 
   const setActive = (id) => {
     rows.forEach((btn, key) => btn.classList.toggle('is-active', key === id));
   };
 
-  const select = (station) => {
-    const marker = markers.get(station.id);
-
-    // On mobile the card is a bottom sheet over the lower half of the map, so the
-    // marker is centred in the strip above it rather than behind it. Done by
-    // shifting the centre south in world coordinates -- a panBy here would race
-    // the zoom animation and land somewhere arbitrary.
+  /* Centre a point in the strip above the bottom sheet rather than behind it, by
+     shifting the target centre south in world coordinates. A panBy here would race
+     the zoom animation and land somewhere arbitrary. */
+  const focusOn = (lat, lng, mode) => {
     const zoom = Math.max(map.getZoom() || 0, FOCUS_ZOOM);
-    const sheet = window.matchMedia('(max-width: 768px)').matches;
-    // 55px clears the sheet while leaving room for the pin graphic, which rises
-    // 70px above its anchor point.
-    const offsetPx = sheet ? 55 : 0;
+    const sheet = expanded || window.matchMedia('(max-width: 768px)').matches;
+    const offsetPx = sheet ? OFFSET_PX[mode || (expanded ? 'expanded' : 'collapsed')] : 0;
     // 156543.03392 m/px at zoom 0 on the equator; /111320 converts metres to degrees.
-    const latShift = (offsetPx * 156543.03392 * Math.cos((station.lat * Math.PI) / 180))
+    const latShift = (offsetPx * 156543.03392 * Math.cos((lat * Math.PI) / 180))
       / Math.pow(2, zoom) / 111320;
 
     map.setZoom(zoom);
-    map.panTo({ lat: station.lat - latShift, lng: station.lng });
+    map.panTo({ lat: lat - latShift, lng });
+  };
+
+  const select = (station) => {
+    const marker = markers.get(station.id);
+    focusOn(station.lat, station.lng);
     if (marker && !reducedMotion) {
       marker.setAnimation(google.maps.Animation.BOUNCE);
       setTimeout(() => marker.setAnimation(null), 700);
     }
     card.show(station);
     setActive(station.id);
+    stage.classList.add('is-selected'); // the hint has served its purpose
+  };
+
+  /* Called by the expand controller once the stage has been reparented, so the map
+     re-frames itself for its new size. */
+  const refocus = (mode) => {
+    expanded = mode === 'expanded';
+    if (!expanded) {
+      map.setZoom(MAP_ZOOM);
+      map.setCenter(MAP_CENTER);
+      return;
+    }
+    if (STATIONS.length > 1) {
+      const bounds = new google.maps.LatLngBounds();
+      STATIONS.forEach((s) => bounds.extend({ lat: s.lat, lng: s.lng }));
+      map.fitBounds(bounds, 64);
+    } else if (STATIONS[0]) {
+      focusOn(STATIONS[0].lat, STATIONS[0].lng, 'expanded');
+    }
   };
 
   STATIONS.forEach((station) => {
@@ -192,6 +273,7 @@ function initMap(mapEl, wrap, rows) {
   }
 
   map.addListener('click', card.close);
+  initExpand(map, stage, wrap, refocus);
 
   return select;
 }
@@ -204,7 +286,8 @@ export default function initStations() {
   const listEl = document.getElementById('stations-list');
   if (!section || !mapEl || !listEl) return;
 
-  const wrap = mapEl.parentElement;
+  const stage = document.getElementById('stations-stage');
+  const wrap = stage ? stage.parentElement : mapEl.parentElement;
   let select = null;
   const rows = renderList(listEl, (station) => {
     if (select) select(station);
@@ -230,7 +313,7 @@ export default function initStations() {
     if (started) return;
     started = true;
     loadMapsApi()
-      .then(() => { select = initMap(mapEl, wrap, rows); })
+      .then(() => { select = initMap(mapEl, stage, wrap, rows); })
       .catch((err) => {
         console.warn('[fawaky] stations map unavailable:', err.message);
         renderFallback(wrap);
