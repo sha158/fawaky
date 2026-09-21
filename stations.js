@@ -127,7 +127,9 @@ async function fetchRoute(origin, station) {
       travelMode: 'DRIVING',
       routingPreference: 'TRAFFIC_AWARE',
       // Ask only for what we draw and display — the field mask affects billing tier.
-      fields: ['routes.path', 'routes.distanceMeters', 'routes.durationMillis', 'routes.viewport'],
+      // Bare property names: the "routes." prefix is REST field-mask syntax and is
+      // rejected by the JS SDK.
+      fields: ['path', 'distanceMeters', 'durationMillis', 'viewport'],
     });
 
     const route = res && res.routes && res.routes[0];
