@@ -39,8 +39,15 @@ for (const { name, width, height } of SHOTS) {
     scrollLocked = await page.evaluate(() => document.body.classList.contains('is-map-expanded'));
     await page.screenshot({ path: `scripts/preview-stations-${name}-expanded.png` });
 
-    await page.locator('#stations-map img[src*="map-pin"]').first().click({ timeout: 5000 }).catch(() => {});
+    // Click the pin's bubble, not the bounding-box centre -- that lands on the
+    // teardrop's transparent tip and misses Google's hit area.
+    const pin = page.locator('#stations-map img[src*="map-pin"]').first();
+    const box = await pin.boundingBox();
+    if (box) await page.mouse.click(box.x + box.width / 2, box.y + box.height * 0.35);
     await page.waitForTimeout(2000);
+    const cardOpen = await page.locator('.ls-station-card').isVisible();
+    const cta = await page.locator('.ls-station-card-cta').getAttribute('href').catch(() => '');
+    const ctaOk = /destination=12\.855757/.test(cta || '');
     await page.screenshot({ path: `scripts/preview-stations-${name}-expanded-card.png` });
 
     // Escape should restore the tile.
@@ -48,7 +55,7 @@ for (const { name, width, height } of SHOTS) {
     await page.waitForTimeout(1200);
     const closed = !(await page.locator('.ls-stations-overlay').isVisible());
     const unlocked = await page.evaluate(() => !document.body.classList.contains('is-map-expanded'));
-    console.log(`${name.padEnd(8)} ${String(width).padStart(4)}px  expand=${hasExpand} overlay=${overlay} lock=${scrollLocked} esc-closed=${closed} unlocked=${unlocked} errors=${errors.length}`);
+    console.log(`${name.padEnd(8)} ${String(width).padStart(4)}px  expand=${hasExpand} overlay=${overlay} lock=${scrollLocked} pin-tap=${cardOpen} directions=${ctaOk} esc-closed=${closed} unlocked=${unlocked} errors=${errors.length}`);
   } else {
     console.log(`${name.padEnd(8)} ${String(width).padStart(4)}px  NO EXPAND BUTTON (fallback?)  errors=${errors.length}`);
   }
