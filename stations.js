@@ -145,11 +145,20 @@ function initMap(mapEl, wrap, rows) {
 
   const select = (station) => {
     const marker = markers.get(station.id);
-    map.panTo({ lat: station.lat, lng: station.lng });
-    if (map.getZoom() < FOCUS_ZOOM) map.setZoom(FOCUS_ZOOM);
-    // On mobile the card is a bottom sheet covering the lower half of the map,
-    // so lift the marker clear of it instead of centring it behind the sheet.
-    if (window.matchMedia('(max-width: 768px)').matches) map.panBy(0, -88);
+
+    // On mobile the card is a bottom sheet over the lower half of the map, so the
+    // marker is centred in the strip above it rather than behind it. Done by
+    // shifting the centre south in world coordinates -- a panBy here would race
+    // the zoom animation and land somewhere arbitrary.
+    const zoom = Math.max(map.getZoom() || 0, FOCUS_ZOOM);
+    const sheet = window.matchMedia('(max-width: 768px)').matches;
+    const offsetPx = sheet ? 92 : 0;
+    // 156543.03392 m/px at zoom 0 on the equator; /111320 converts metres to degrees.
+    const latShift = (offsetPx * 156543.03392 * Math.cos((station.lat * Math.PI) / 180))
+      / Math.pow(2, zoom) / 111320;
+
+    map.setZoom(zoom);
+    map.panTo({ lat: station.lat - latShift, lng: station.lng });
     if (marker && !reducedMotion) {
       marker.setAnimation(google.maps.Animation.BOUNCE);
       setTimeout(() => marker.setAnimation(null), 700);
