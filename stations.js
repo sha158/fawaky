@@ -147,6 +147,9 @@ function initMap(mapEl, wrap, rows) {
     const marker = markers.get(station.id);
     map.panTo({ lat: station.lat, lng: station.lng });
     if (map.getZoom() < FOCUS_ZOOM) map.setZoom(FOCUS_ZOOM);
+    // On mobile the card is a bottom sheet covering the lower half of the map,
+    // so lift the marker clear of it instead of centring it behind the sheet.
+    if (window.matchMedia('(max-width: 768px)').matches) map.panBy(0, -88);
     if (marker && !reducedMotion) {
       marker.setAnimation(google.maps.Animation.BOUNCE);
       setTimeout(() => marker.setAnimation(null), 700);

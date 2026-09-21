@@ -4238,10 +4238,10 @@ button:focus-visible,
   }
   .ls-stations-map-wrap {
     border-radius: 16px;
-    min-height: 320px;
+    min-height: 380px;
   }
   .ls-stations-map {
-    height: 320px;
+    height: 380px;
   }
 
   /* The card becomes a bottom sheet inside the map, as in the hero mockup. */
