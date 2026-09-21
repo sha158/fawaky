@@ -152,7 +152,9 @@ function initMap(mapEl, wrap, rows) {
     // the zoom animation and land somewhere arbitrary.
     const zoom = Math.max(map.getZoom() || 0, FOCUS_ZOOM);
     const sheet = window.matchMedia('(max-width: 768px)').matches;
-    const offsetPx = sheet ? 92 : 0;
+    // 55px clears the sheet while leaving room for the pin graphic, which rises
+    // 70px above its anchor point.
+    const offsetPx = sheet ? 55 : 0;
     // 156543.03392 m/px at zoom 0 on the equator; /111320 converts metres to degrees.
     const latShift = (offsetPx * 156543.03392 * Math.cos((station.lat * Math.PI) / 180))
       / Math.pow(2, zoom) / 111320;
