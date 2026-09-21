@@ -471,6 +471,25 @@ function initAnimations() {
     });
   }
 
+  /* STATIONS — store locator */
+  const stationsMap = document.querySelector('.ls-stations-map-wrap');
+  if (stationsMap) {
+    gsap.from('.ls-stations .ls-section-head > *', {
+      scrollTrigger: { trigger: '.ls-stations', start: 'top 85%' },
+      y: 40, opacity: 0, duration: 0.8, stagger: 0.1, ease
+    });
+    gsap.from(stationsMap, {
+      scrollTrigger: { trigger: '.ls-stations-grid', start: 'top 88%' },
+      y: 40, opacity: 0, duration: 0.8, ease
+    });
+    // The list container, not its rows -- rows are rendered later by stations.js,
+    // which is imported after initAnimations() runs.
+    gsap.from('.ls-stations-list', {
+      scrollTrigger: { trigger: '.ls-stations-grid', start: 'top 88%' },
+      y: 30, opacity: 0, duration: 0.7, delay: 0.1, ease
+    });
+  }
+
   /* §8 SEASONAL */
   const seasonalInner = document.querySelector('.ls-seasonal-inner');
   if (seasonalInner) {
@@ -690,6 +709,7 @@ function initApp() {
   initScrollSpy();
   initStickyCta();
   initAnimations();
+  import('./stations.js').then((m) => m.default());
   import('./motion-fx.js').then((m) => m.default());
 }
 

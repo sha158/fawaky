@@ -4005,3 +4005,289 @@ button:focus-visible,
   text-transform: uppercase;
   letter-spacing: 0.1em;
 }
+
+/* ═══════════════════════════════════════════════════════════
+   Fawaky Stations — store locator
+   ═══════════════════════════════════════════════════════════ */
+
+/* The eyebrow goes Ice Apple Green here, as in the locator mockups. */
+.ls-stations .ls-tag {
+  color: var(--fw-green);
+  background: rgba(146, 184, 61, 0.12);
+}
+
+.ls-stations-grid {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 32px;
+  align-items: start;
+}
+
+/* ─── Outlet list ─── */
+.ls-stations-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-radius: 18px;
+  background: var(--fw-card-bg);
+  border: 1px solid var(--fw-card-bd);
+  overflow: hidden;
+}
+
+.ls-station-row + .ls-station-row {
+  border-top: 1px solid var(--fw-card-bd);
+}
+
+.ls-station-btn {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  min-height: 72px;
+  padding: 18px 20px;
+  background: none;
+  border: 0;
+  text-align: left;
+  cursor: pointer;
+  font-family: var(--font-body);
+  color: var(--ls-text);
+  transition: background 0.3s var(--ease);
+}
+
+.ls-station-btn:hover,
+.ls-station-btn:focus-visible {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.ls-station-btn.is-active {
+  background: rgba(146, 184, 61, 0.1);
+  box-shadow: inset 3px 0 0 var(--fw-green);
+}
+
+.ls-station-pin {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(146, 184, 61, 0.14);
+  color: var(--fw-green);
+}
+
+.ls-station-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.ls-station-name {
+  font-size: var(--fs-2xl);
+  font-weight: 700;
+  letter-spacing: var(--ls-label);
+}
+
+.ls-station-area {
+  font-size: var(--fs-xs);
+  color: var(--ls-muted);
+}
+
+/* ─── Map ─── */
+.ls-stations-map-wrap {
+  position: relative;
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid var(--fw-card-bd);
+  background: var(--ls-surface);
+  min-height: 520px;
+}
+
+.ls-stations-map {
+  width: 100%;
+  height: 520px;
+}
+
+/* Google injects its own focus ring on the canvas; keep it off the rounded edge. */
+.ls-stations-map * {
+  outline-offset: -2px;
+}
+
+/* ─── Selected-station card ─── */
+.ls-station-card {
+  position: absolute;
+  left: 20px;
+  bottom: 20px;
+  width: 292px;
+  padding: 20px 20px 18px;
+  border-radius: 16px;
+  background: var(--fw-ivory);
+  color: var(--fw-ink);
+  box-shadow: 0 16px 40px rgba(23, 0, 31, 0.28);
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.35s var(--ease), transform 0.35s var(--ease);
+}
+
+.ls-station-card.is-open {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.ls-station-card-close {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--fw-ink);
+  opacity: 0.45;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.ls-station-card-close:hover {
+  opacity: 1;
+}
+
+.ls-station-card-handle {
+  display: none;
+}
+
+.ls-station-card-name {
+  font-family: var(--font-display);
+  font-size: var(--fs-4xl);
+  font-weight: 800;
+  line-height: var(--lh-snug);
+  color: var(--fw-ink);
+  margin: 0 0 4px;
+}
+
+.ls-station-card-area {
+  font-family: var(--font-body);
+  font-size: var(--fs-sm);
+  color: rgba(26, 26, 26, 0.68);
+  margin: 0 0 16px;
+}
+
+.ls-station-card-cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+  border-radius: 9999px;
+  background: var(--ls-primary);
+  color: #fff;
+  font-family: var(--font-body);
+  font-size: var(--fs-md);
+  font-weight: 700;
+  text-decoration: none;
+  transition: background 0.3s var(--ease);
+}
+
+.ls-station-card-cta:hover {
+  background: var(--ls-primary-hover);
+}
+
+/* ─── Fallback: no key, or the Maps script never arrived ─── */
+.ls-stations-map-wrap.is-fallback {
+  display: grid;
+  place-items: center;
+  gap: 16px;
+  padding: 40px 24px;
+  min-height: 320px;
+  background:
+    radial-gradient(120% 120% at 50% 0%, rgba(94, 31, 120, 0.35), transparent 70%),
+    var(--ls-surface);
+}
+
+.ls-station-fallback {
+  width: min(320px, 100%);
+  text-align: center;
+  padding: 24px 20px;
+  border-radius: 16px;
+  background: var(--fw-ivory);
+  color: var(--fw-ink);
+}
+
+/* ─── Tablet ─── */
+@media (max-width: 1024px) {
+  .ls-stations-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  .ls-stations-map-wrap {
+    order: -1; /* map leads on narrow screens, as in the mockups */
+    min-height: 420px;
+  }
+  .ls-stations-map {
+    height: 420px;
+  }
+}
+
+/* ─── Mobile ─── */
+@media (max-width: 768px) {
+  /* Clear the sticky WhatsApp bar, which reveals from #reviews onward
+     and would otherwise sit on top of Get Directions. */
+  .ls-stations {
+    padding-bottom: calc(100px + env(safe-area-inset-bottom));
+  }
+  .ls-stations-map-wrap {
+    border-radius: 16px;
+    min-height: 320px;
+  }
+  .ls-stations-map {
+    height: 320px;
+  }
+
+  /* The card becomes a bottom sheet inside the map, as in the hero mockup. */
+  .ls-station-card {
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+    width: auto;
+    padding: 18px 18px 16px;
+    border-radius: 18px;
+    text-align: center;
+    transform: translateY(18px);
+  }
+  .ls-station-card.is-open {
+    transform: translateY(0);
+  }
+  .ls-station-card-handle {
+    display: block;
+    width: 38px;
+    height: 4px;
+    margin: -6px auto 12px;
+    border-radius: 9999px;
+    background: rgba(26, 26, 26, 0.18);
+  }
+  .ls-station-card-cta {
+    min-height: 50px;
+  }
+  .ls-station-btn {
+    min-height: 68px;
+    padding: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .ls-stations-map-wrap,
+  .ls-stations-map {
+    min-height: 260px;
+    height: 260px;
+  }
+  .ls-station-card-name {
+    font-size: var(--fs-3xl);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ls-station-card {
+    transition: none;
+  }
+}

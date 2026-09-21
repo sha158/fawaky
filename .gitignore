@@ -5,3 +5,15 @@ dist
 .vercel
 .claude
 CLAUDE.md
+
+# secrets
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+secrets/
+
+# local scratch
+tmp/
+output/

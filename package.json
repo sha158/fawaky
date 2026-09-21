@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "images": "node scripts/optimize-images.mjs"
+    "images": "node scripts/optimize-images.mjs",
+    "map-pin": "node scripts/make-map-pin.mjs"
   },
   "devDependencies": {
     "playwright": "^1.60.0",
