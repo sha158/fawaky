@@ -14,14 +14,15 @@ window.google = { maps: {
   event:{trigger(){},addListenerOnce(){}},
   Polyline:function(o){ this.o=o; window.__polylines.push(this);
     this.setMap=function(m){ if(m===null) window.__polylines=window.__polylines.filter(p=>p!==this); }; },
-  DirectionsService:function(){
-    this.route=function(req,cb){
+  importLibrary:function(name){
+    if (name !== 'routes') return Promise.resolve({});
+    return Promise.resolve({ Route: { computeRoutes: function(req){
       window.__directionsCalls++;
-      if (window.__forceStatus) return cb(null, window.__forceStatus);
-      cb({ routes:[{ overview_path:[LL(12.90,74.84),LL(12.88,74.85),LL(12.855757,74.8537288)],
-                     bounds:{__b:true},
-                     legs:[{ distance:{text:'5.4 km'}, duration:{text:'14 min'} }] }] }, 'OK');
-    };
+      if (window.__forceStatus) return Promise.reject(new Error(window.__forceStatus));
+      return Promise.resolve({ routes:[{
+        path:[LL(12.90,74.84),LL(12.88,74.85),LL(12.855757,74.8537288)],
+        viewport:{__b:true}, distanceMeters:5400, durationMillis:840000 }] });
+    }}});
   },
   Map:function(el,opts){ this._z=opts.zoom; el.style.background='#eef1e6'; el.style.position='relative';
     el.innerHTML='<div id="stub-pin" style="position:absolute;left:50%;top:50%;width:56px;height:70px;background:#5E1F78"></div>';
@@ -83,7 +84,7 @@ async function run(label, { grant, forceStatus }) {
 
 await run('granted', { grant: true });
 await run('denied', { grant: false });
-await run('req-denied', { grant: true, forceStatus: 'REQUEST_DENIED' });
+await run('req-denied', { grant: true, forceStatus: 'PERMISSION_DENIED: Routes API not enabled' });
 
 await browser.close();
 for (const r of out) {

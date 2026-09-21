@@ -91,51 +91,70 @@ function getPosition() {
 /* ─── Route ────────────────────────────────────────────── */
 
 const ROUTE_LINE = { color: '#5E1F78', casing: '#FFFFFF' };
-const routeCache = new Map(); // station.id -> {path, distance, duration}
-let directionsService = null;
-let quotaExhausted = false;
+const routeCache = new Map(); // station.id -> {path, bounds, distance, duration} | null
+let routesLib = null;
+let routingDisabled = false;
 
-/* Resolves {path, distance, duration} or null. Billed per call, so results are
-   cached per station and never retried on quota errors. */
-function fetchRoute(origin, station) {
-  if (quotaExhausted) return Promise.resolve(null);
-  if (routeCache.has(station.id)) return Promise.resolve(routeCache.get(station.id));
+const formatDistance = (m) => (m < 950 ? `${Math.round(m / 50) * 50} m` : `${(m / 1000).toFixed(1)} km`);
 
-  directionsService = directionsService || new google.maps.DirectionsService();
+function formatDuration(ms) {
+  const mins = Math.max(1, Math.round(ms / 60000));
+  if (mins < 60) return `${mins} min`;
+  const h = Math.floor(mins / 60);
+  const r = mins % 60;
+  return r ? `${h} h ${r} min` : `${h} h`;
+}
 
-  return new Promise((resolve) => {
-    directionsService.route({
+/* Resolves {path, bounds, distance, duration} or null; never rejects.
+
+   Uses Route.computeRoutes from the Maps JS SDK. The older DirectionsService was
+   deprecated on 2026-02-25 and is refused outright on projects that never had the
+   legacy Directions API enabled. This path needs the Routes API instead.
+
+   Billed per call, so every result — including failures — is cached per station,
+   and a quota error disables routing for the session rather than retrying. */
+async function fetchRoute(origin, station) {
+  if (routingDisabled) return null;
+  if (routeCache.has(station.id)) return routeCache.get(station.id);
+
+  try {
+    routesLib = routesLib || await google.maps.importLibrary('routes');
+    const { Route } = routesLib;
+
+    const res = await Route.computeRoutes({
       origin,
       destination: { lat: station.lat, lng: station.lng },
       travelMode: 'DRIVING',
-    }, (result, status) => {
-      if (status === 'OK' && result.routes[0]) {
-        const route = result.routes[0];
-        const leg = route.legs[0];
-        const data = {
-          path: route.overview_path,
-          bounds: route.bounds,
-          distance: leg && leg.distance ? leg.distance.text : '',
-          duration: leg && leg.duration ? leg.duration.text : '',
-        };
-        routeCache.set(station.id, data);
-        resolve(data);
-        return;
-      }
-
-      if (status === 'REQUEST_DENIED') {
-        console.warn('[fawaky] Directions request denied. Enable the Directions API in Google Cloud Console and add it to this key\'s API restrictions.');
-      } else if (status === 'OVER_QUERY_LIMIT') {
-        // Never retry a billed endpoint in a loop.
-        quotaExhausted = true;
-        console.warn('[fawaky] Directions quota exhausted — routing disabled for this session.');
-      } else if (status !== 'ZERO_RESULTS') {
-        console.warn('[fawaky] Directions failed:', status);
-      }
-      routeCache.set(station.id, null);
-      resolve(null);
+      routingPreference: 'TRAFFIC_AWARE',
+      // Ask only for what we draw and display — the field mask affects billing tier.
+      fields: ['routes.path', 'routes.distanceMeters', 'routes.durationMillis', 'routes.viewport'],
     });
-  });
+
+    const route = res && res.routes && res.routes[0];
+    if (!route) { routeCache.set(station.id, null); return null; }
+
+    const data = {
+      path: route.path,
+      bounds: route.viewport,
+      distance: formatDistance(route.distanceMeters),
+      duration: formatDuration(route.durationMillis),
+    };
+    routeCache.set(station.id, data);
+    return data;
+  } catch (err) {
+    const msg = String((err && err.message) || err);
+    if (/denied|not enabled|PERMISSION/i.test(msg)) {
+      routingDisabled = true;
+      console.warn('[fawaky] Routes request denied. Enable the Routes API in Google Cloud Console and add it to this key\'s API restrictions.');
+    } else if (/quota|RESOURCE_EXHAUSTED|OVER_QUERY/i.test(msg)) {
+      routingDisabled = true; // never retry a billed endpoint in a loop
+      console.warn('[fawaky] Routes quota exhausted — routing disabled for this session.');
+    } else {
+      console.warn('[fawaky] Route lookup failed:', msg);
+    }
+    routeCache.set(station.id, null);
+    return null;
+  }
 }
 
 /* ─── List ─────────────────────────────────────────────── */
