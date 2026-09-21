@@ -172,6 +172,40 @@ async function fetchRoute(origin, station) {
   }
 }
 
+/* ─── "You are here" dot ───────────────────────────────── */
+
+/* A DOM overlay rather than a Marker, because a Marker icon is a static image and
+   cannot pulse. AdvancedMarkerElement would allow DOM content but requires a cloud
+   Map ID, which would make our inline `styles` a no-op — so OverlayView it is.
+   Built lazily: google.maps.OverlayView does not exist until the SDK has loaded. */
+function makeYouAreHere(map, lat, lng) {
+  class YouAreHere extends google.maps.OverlayView {
+    onAdd() {
+      this.div = document.createElement('div');
+      this.div.className = 'ls-you-dot';
+      this.div.setAttribute('aria-hidden', 'true');
+      this.getPanes().floatPane.appendChild(this.div);
+    }
+
+    draw() {
+      const projection = this.getProjection();
+      if (!this.div || !projection) return;
+      const point = projection.fromLatLngToDivPixel(new google.maps.LatLng(lat, lng));
+      if (!point) return;
+      this.div.style.left = `${point.x}px`;
+      this.div.style.top = `${point.y}px`;
+    }
+
+    onRemove() {
+      if (this.div) { this.div.remove(); this.div = null; }
+    }
+  }
+
+  const overlay = new YouAreHere();
+  overlay.setMap(map);
+  return overlay;
+}
+
 /* ─── List ─────────────────────────────────────────────── */
 
 function renderList(listEl, onSelect) {
@@ -363,6 +397,7 @@ function initMap(mapEl, stage, wrap, rows) {
      stays legible over the pale basemap and the green parks. */
   let routeLines = [];
   let currentRoute = null;
+  let youAreHere = null;
 
   // The expanded view has a bottom sheet to clear; the collapsed tile does not.
   const PAD = {
@@ -445,6 +480,11 @@ function initMap(mapEl, stage, wrap, rows) {
   const maybeRoute = async () => {
     const origin = await getPosition();
     if (!origin) return;
+
+    // Independent of routing: if the route fails, the visitor should still be able
+    // to see where they are relative to the station.
+    if (!youAreHere) youAreHere = makeYouAreHere(map, origin.lat, origin.lng);
+
     const station = nearestStation(origin);
     if (!station) return;
 

@@ -11,6 +11,12 @@ window.google = { maps: {
   Size:function(w,h){this.w=w;this.h=h;}, Point:function(x,y){this.x=x;this.y=y;},
   Animation:{BOUNCE:1},
   LatLngBounds:function(){ this.extend=function(){return this;}; },
+  LatLng:function(lat,lng){ this.__lat=lat; this.__lng=lng; },
+  OverlayView: class {
+    setMap(m){ if(m){ this.onAdd&&this.onAdd(); this.draw&&this.draw(); } else { this.onRemove&&this.onRemove(); } }
+    getPanes(){ return { floatPane: document.getElementById('stations-map') }; }
+    getProjection(){ return { fromLatLngToDivPixel: function(){ return {x:120,y:120}; } }; }
+  },
   event:{trigger(){},addListenerOnce(){}},
   Polyline:function(o){ this.o=o; window.__polylines.push(this);
     this.setMap=function(m){ if(m===null) window.__polylines=window.__polylines.filter(p=>p!==this); }; },
@@ -64,6 +70,7 @@ async function run(label, { grant, forceStatus }) {
     rowDist: (document.querySelector('.ls-station-dist') || {}).textContent || '',
     rowHidden: (document.querySelector('.ls-station-dist') || {}).hidden,
     cardOpen: !!document.querySelector('.ls-station-card.is-open'),
+    dot: !!document.querySelector('.ls-you-dot'),
     hintVisible: (() => { const h = document.getElementById('stations-hint');
       return h ? getComputedStyle(h).opacity === '1' : false; })(),
   }));
@@ -101,6 +108,6 @@ await run('req-denied', { grant: true, forceStatus: 'PERMISSION_DENIED: Routes A
 await browser.close();
 for (const r of out) {
   const c = r.collapsed;
-  console.log(`${r.label.padEnd(11)} COLLAPSED lines=${c.lines} row="${c.rowDist}" card=${c.cardOpen} hint=${c.hintVisible}`);
+  console.log(`${r.label.padEnd(11)} COLLAPSED lines=${c.lines} dot=${c.dot} row="${c.rowDist}" card=${c.cardOpen} hint=${c.hintVisible}`);
   console.log(`${''.padEnd(11)} EXPANDED  lines=${r.lines} calls=${r.calls}->${r.callsAfterSecond} card=${r.cardOpen} afterCollapse=${r.afterCollapse} errors=${r.loud}`);
 }

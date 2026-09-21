@@ -4497,3 +4497,39 @@ body.is-map-expanded {
 .ls-station-dist[hidden] {
   display: none;
 }
+
+/* "You are here" — a DOM overlay on the map, positioned by its own draw().
+   left/top are the projected pixel point, so the dot is pulled back by half its
+   size to sit centred on the coordinate. */
+.ls-you-dot {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  margin: -9px 0 0 -9px;
+  border-radius: 50%;
+  background: var(--fw-green);
+  border: 3px solid #fff;
+  box-shadow: 0 0 0 1px rgba(23, 0, 31, 0.18), 0 2px 8px rgba(23, 0, 31, 0.35);
+}
+
+.ls-you-dot::after {
+  content: '';
+  position: absolute;
+  inset: -7px;
+  border-radius: 50%;
+  background: var(--fw-green);
+  opacity: 0.4;
+  animation: ls-you-pulse 2.4s var(--ease) infinite;
+}
+
+@keyframes ls-you-pulse {
+  0%   { transform: scale(0.55); opacity: 0.45; }
+  100% { transform: scale(1.9);  opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ls-you-dot::after {
+    animation: none;
+    opacity: 0.22;
+  }
+}
