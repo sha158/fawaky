@@ -55,7 +55,19 @@ async function run(label, { grant, forceStatus }) {
 
   await page.goto('http://localhost:5173/', { waitUntil: 'load' });
   await page.locator('#stations').scrollIntoViewIfNeeded();
-  await page.waitForTimeout(1200);
+  await page.mouse.wheel(0, 50); // first gesture — this is what primes location
+  await page.waitForTimeout(3000);
+
+  // The route must already be drawn WITHOUT expanding.
+  const collapsed = await page.evaluate(() => ({
+    lines: window.__polylines.length,
+    rowDist: (document.querySelector('.ls-station-dist') || {}).textContent || '',
+    rowHidden: (document.querySelector('.ls-station-dist') || {}).hidden,
+    cardOpen: !!document.querySelector('.ls-station-card.is-open'),
+    hintVisible: (() => { const h = document.getElementById('stations-hint');
+      return h ? getComputedStyle(h).opacity === '1' : false; })(),
+  }));
+
   await page.locator('#stations-expand').click();
   await page.waitForTimeout(2500);
 
@@ -77,7 +89,7 @@ async function run(label, { grant, forceStatus }) {
   await page.waitForTimeout(2000);
   const callsAfterSecond = await page.evaluate(() => window.__directionsCalls);
 
-  out.push({ label, ...r, afterCollapse, callsAfterSecond, loud: loud.length });
+  out.push({ label, collapsed, ...r, afterCollapse, callsAfterSecond, loud: loud.length });
   await page.screenshot({ path: `/private/tmp/claude-501/-Users-shamshuttechlab-com-Documents-fawaky/ed84bd38-997c-4789-8bf9-6f3990f5f803/scratchpad/r-${label}.png` });
   await ctx.close();
 }
@@ -88,5 +100,7 @@ await run('req-denied', { grant: true, forceStatus: 'PERMISSION_DENIED: Routes A
 
 await browser.close();
 for (const r of out) {
-  console.log(`${r.label.padEnd(11)} lines=${r.lines} calls=${r.calls}->${r.callsAfterSecond} fitted=${r.fitted} card=${r.cardOpen} text="${r.routeText}" hidden=${r.routeHidden} afterCollapse=${r.afterCollapse} loudErrors=${r.loud}`);
+  const c = r.collapsed;
+  console.log(`${r.label.padEnd(11)} COLLAPSED lines=${c.lines} row="${c.rowDist}" card=${c.cardOpen} hint=${c.hintVisible}`);
+  console.log(`${''.padEnd(11)} EXPANDED  lines=${r.lines} calls=${r.calls}->${r.callsAfterSecond} card=${r.cardOpen} afterCollapse=${r.afterCollapse} errors=${r.loud}`);
 }

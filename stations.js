@@ -88,6 +88,19 @@ function getPosition() {
   return positionPromise;
 }
 
+/* Warm the location up on the visitor's first interaction, well before they reach
+   the map, so the route is already drawn when the section scrolls into view.
+   A gesture-backed prompt is treated far more favourably by Chrome than a cold one,
+   and a denial is permanent for that visitor -- worth the wait for a real gesture. */
+function primeLocation() {
+  const events = ['pointerdown', 'touchstart', 'keydown', 'scroll'];
+  const onFirst = () => {
+    events.forEach((ev) => window.removeEventListener(ev, onFirst));
+    getPosition(); // memoised — safe to call again later
+  };
+  events.forEach((ev) => window.addEventListener(ev, onFirst, { once: true, passive: true }));
+}
+
 /* ─── Route ────────────────────────────────────────────── */
 
 const ROUTE_LINE = { color: '#5E1F78', casing: '#FFFFFF' };
@@ -181,6 +194,7 @@ function renderList(listEl, onSelect) {
       <span class="ls-station-meta">
         <span class="ls-station-name">${station.name}</span>
         <span class="ls-station-area">${station.area}</span>
+        <span class="ls-station-dist" hidden></span>
       </span>`;
     btn.addEventListener('click', () => onSelect(station));
 
@@ -297,7 +311,7 @@ function initExpand(map, stage, wrap, refocus, onExpand, onCollapse) {
     expandBtn.setAttribute('aria-expanded', 'false');
     map.setOptions({ gestureHandling: 'cooperative' });
     stage.classList.remove('is-selected'); // hint returns for the next visit
-    if (onCollapse) onCollapse(); // drop the route so the tile re-frames cleanly
+    if (onCollapse) onCollapse();
     requestAnimationFrame(() => { refocus('collapsed'); expandBtn.focus(); });
   }
 
@@ -348,15 +362,46 @@ function initMap(mapEl, stage, wrap, rows) {
   /* Two overlaid lines: a white casing under a brand-purple stroke, so the route
      stays legible over the pale basemap and the green parks. */
   let routeLines = [];
+  let currentRoute = null;
+
+  // The expanded view has a bottom sheet to clear; the collapsed tile does not.
+  const PAD = {
+    collapsed: { top: 40, right: 24, bottom: 40, left: 24 },
+    expanded: { top: 72, right: 40, bottom: 220, left: 40 },
+  };
+
+  /* Three states to frame, not two: a drawn route wins over everything, because
+     a route the viewer cannot see is the same as no route at all. */
+  const frameMap = (mode) => {
+    const m = mode || (expanded ? 'expanded' : 'collapsed');
+    if (currentRoute && currentRoute.bounds) {
+      map.fitBounds(currentRoute.bounds, PAD[m]);
+      return;
+    }
+    if (m === 'expanded') {
+      if (STATIONS.length > 1) {
+        const bounds = new google.maps.LatLngBounds();
+        STATIONS.forEach((s) => bounds.extend({ lat: s.lat, lng: s.lng }));
+        map.fitBounds(bounds, 64);
+      } else if (STATIONS[0]) {
+        focusOn(STATIONS[0].lat, STATIONS[0].lng, 'expanded');
+      }
+      return;
+    }
+    map.setZoom(MAP_ZOOM);
+    map.setCenter(MAP_CENTER);
+  };
 
   const clearRoute = () => {
     routeLines.forEach((l) => l.setMap(null));
     routeLines = [];
+    currentRoute = null;
   };
 
   const drawRoute = (route) => {
     clearRoute();
     if (!route || !route.path) return;
+    currentRoute = route;
     routeLines = [
       new google.maps.Polyline({
         path: route.path, map, strokeColor: ROUTE_LINE.casing,
@@ -367,12 +412,15 @@ function initMap(mapEl, stage, wrap, rows) {
         strokeOpacity: 1, strokeWeight: 5, zIndex: 2,
       }),
     ];
-    // Frame the whole route. Without this the line is simply off-screen for any
-    // visitor more than a few hundred metres away. Bottom padding keeps it clear
-    // of the card.
-    if (route.bounds) {
-      map.fitBounds(route.bounds, { top: 72, right: 40, bottom: 220, left: 40 });
-    }
+    frameMap();
+  };
+
+  const setRowDistance = (stationId, text) => {
+    const btn = rows.get(stationId);
+    const el = btn && btn.querySelector('.ls-station-dist');
+    if (!el) return;
+    el.textContent = text;
+    el.hidden = !text;
   };
 
   const select = (station) => {
@@ -387,8 +435,13 @@ function initMap(mapEl, stage, wrap, rows) {
     stage.classList.add('is-selected'); // the hint has served its purpose
   };
 
-  /* Auto-route on expand. Silent whenever the visitor has not granted location or
-     the Directions API is unavailable -- the map simply behaves as it did before. */
+  /* Draws the route as soon as both the map and the visitor's position are ready --
+     no expand required. Silent whenever location was declined or routing is
+     unavailable: the map simply behaves as it did before.
+
+     While collapsed this deliberately does NOT open the card or mark the stage
+     selected. The card would cover most of a 380px tile, and `is-selected` hides
+     the "Tap the pin" hint before the visitor has done anything at all. */
   const maybeRoute = async () => {
     const origin = await getPosition();
     if (!origin) return;
@@ -399,27 +452,20 @@ function initMap(mapEl, stage, wrap, rows) {
     if (!route) return;
 
     drawRoute(route);
-    card.show(station, route);
+    setRowDistance(station.id, `${route.distance} · ${route.duration}`);
     setActive(station.id);
-    stage.classList.add('is-selected');
+
+    if (expanded) {
+      card.show(station, route);
+      stage.classList.add('is-selected');
+    }
   };
 
   /* Called by the expand controller once the stage has been reparented, so the map
      re-frames itself for its new size. */
   const refocus = (mode) => {
     expanded = mode === 'expanded';
-    if (!expanded) {
-      map.setZoom(MAP_ZOOM);
-      map.setCenter(MAP_CENTER);
-      return;
-    }
-    if (STATIONS.length > 1) {
-      const bounds = new google.maps.LatLngBounds();
-      STATIONS.forEach((s) => bounds.extend({ lat: s.lat, lng: s.lng }));
-      map.fitBounds(bounds, 64);
-    } else if (STATIONS[0]) {
-      focusOn(STATIONS[0].lat, STATIONS[0].lng, 'expanded');
-    }
+    frameMap(mode);
   };
 
   STATIONS.forEach((station) => {
@@ -445,7 +491,13 @@ function initMap(mapEl, stage, wrap, rows) {
   }
 
   map.addListener('click', card.close);
-  initExpand(map, stage, wrap, refocus, maybeRoute, clearRoute);
+  // onCollapse re-frames rather than clearing: the route belongs to the page now,
+  // not to the expanded view, and redrawing it would be a second billed request.
+  initExpand(map, stage, wrap, refocus, maybeRoute);
+
+  // Draw as soon as the map exists. Whichever of {map, position} settles last
+  // triggers the line, so it is already there when the section scrolls into view.
+  maybeRoute();
 
   return select;
 }
@@ -471,6 +523,10 @@ export default function initStations() {
     renderFallback(wrap);
     return;
   }
+
+  // Start warming the location immediately — not from the observer below, which
+  // fires too late to have a route ready when the section appears.
+  primeLocation();
 
   /* Key/referrer/billing problems do NOT reject the script promise — Google loads
      fine and then paints its own grey "Oops!" panel over the map. This is the only

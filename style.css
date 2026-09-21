@@ -4231,11 +4231,6 @@ button:focus-visible,
 
 /* ─── Mobile ─── */
 @media (max-width: 768px) {
-  /* Clear the sticky WhatsApp bar, which reveals from #reviews onward
-     and would otherwise sit on top of Get Directions. */
-  .ls-stations {
-    padding-bottom: calc(100px + env(safe-area-inset-bottom));
-  }
   .ls-stations-map-wrap {
     border-radius: 16px;
     min-height: 380px;
@@ -4486,5 +4481,19 @@ body.is-map-expanded {
 }
 
 .ls-station-card-route[hidden] {
+  display: none;
+}
+
+/* Distance to the nearest station, shown in the list row once a route resolves.
+   The row sits on the dark plum panel, so --fw-green reads directly here --
+   unlike the ivory card, where it needed darkening for contrast. */
+.ls-station-dist {
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  letter-spacing: var(--ls-label);
+  color: var(--fw-green);
+}
+
+.ls-station-dist[hidden] {
   display: none;
 }
