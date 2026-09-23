@@ -4533,3 +4533,52 @@ body.is-map-expanded {
     opacity: 0.22;
   }
 }
+
+/* "Show all N" toggle under the station list. */
+.ls-stations-more {
+  display: block;
+  width: 100%;
+  margin-top: 10px;
+  padding: 12px;
+  border: 1px solid var(--fw-card-bd);
+  border-radius: 12px;
+  background: transparent;
+  color: var(--fw-green);
+  font-family: var(--font-body);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  letter-spacing: var(--ls-label);
+  cursor: pointer;
+  transition: background 0.3s var(--ease), border-color 0.3s var(--ease);
+}
+
+.ls-stations-more:hover,
+.ls-stations-more:focus-visible {
+  background: rgba(146, 184, 61, 0.1);
+  border-color: var(--fw-green);
+}
+
+.ls-stations-more[hidden] {
+  display: none;
+}
+
+.ls-station-row[hidden] {
+  display: none;
+}
+
+/* Flashed when a cluster of coincident outlets is tapped — zooming can never
+   separate them, so the list is what tells them apart. */
+.ls-station-btn.is-flagged {
+  background: rgba(146, 184, 61, 0.18);
+  box-shadow: inset 3px 0 0 var(--fw-green);
+  animation: ls-row-flash 2.2s var(--ease);
+}
+
+@keyframes ls-row-flash {
+  0%, 100% { background: rgba(146, 184, 61, 0.18); }
+  50%      { background: rgba(146, 184, 61, 0.04); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ls-station-btn.is-flagged { animation: none; }
+}

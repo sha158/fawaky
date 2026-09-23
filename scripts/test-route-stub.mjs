@@ -6,20 +6,34 @@ const STUB = `
 window.__polylines = [];
 window.__directionsCalls = 0;
 window.__lastFit = null;
+window.__idle = [];
+// Roughly zoom-13 pixels per degree at this latitude, so cluster distances behave
+// like the real map. Tests can change it to simulate zooming in.
+window.__pxPerDeg = 6000;
 function LL(lat,lng){ return {lat:function(){return lat;},lng:function(){return lng;}}; }
 window.google = { maps: {
   Size:function(w,h){this.w=w;this.h=h;}, Point:function(x,y){this.x=x;this.y=y;},
   Animation:{BOUNCE:1},
-  LatLngBounds:function(){ this.extend=function(){return this;}; },
-  LatLng:function(lat,lng){ this.__lat=lat; this.__lng=lng; },
+  SymbolPath:{CIRCLE:0},
+  LatLng:function(lat,lng){ this.__lat=lat; this.__lng=lng;
+    this.lat=function(){return lat;}; this.lng=function(){return lng;}; },
+  LatLngBounds:function(){ var pts=[];
+    this.extend=function(p){ pts.push(p); return this; };
+    this.getNorthEast=function(){ return LL(Math.max.apply(null,pts.map(function(p){return p.lat;})),
+                                            Math.max.apply(null,pts.map(function(p){return p.lng;}))); };
+    this.getSouthWest=function(){ return LL(Math.min.apply(null,pts.map(function(p){return p.lat;})),
+                                            Math.min.apply(null,pts.map(function(p){return p.lng;}))); };
+    this.__pts=pts; },
+  event:{ trigger:function(){}, addListenerOnce:function(){} },
   OverlayView: class {
     setMap(m){ if(m){ this.onAdd&&this.onAdd(); this.draw&&this.draw(); } else { this.onRemove&&this.onRemove(); } }
     getPanes(){ return { floatPane: document.getElementById('stations-map') }; }
-    getProjection(){ return { fromLatLngToDivPixel: function(){ return {x:120,y:120}; } }; }
+    getProjection(){ return { fromLatLngToDivPixel: function(ll){
+      return { x: (ll.__lng - 74.85) * window.__pxPerDeg, y: (12.88 - ll.__lat) * window.__pxPerDeg };
+    } }; }
   },
-  event:{trigger(){},addListenerOnce(){}},
   Polyline:function(o){ this.o=o; window.__polylines.push(this);
-    this.setMap=function(m){ if(m===null) window.__polylines=window.__polylines.filter(p=>p!==this); }; },
+    this.setMap=function(m){ if(m===null) window.__polylines=window.__polylines.filter(function(p){return p!==this;},this); }; },
   importLibrary:function(name){
     if (name !== 'routes') return Promise.resolve({});
     return Promise.resolve({ Route: { computeRoutes: function(req){
@@ -31,13 +45,23 @@ window.google = { maps: {
     }}});
   },
   Map:function(el,opts){ this._z=opts.zoom; el.style.background='#eef1e6'; el.style.position='relative';
-    el.innerHTML='<div id="stub-pin" style="position:absolute;left:50%;top:50%;width:56px;height:70px;background:#5E1F78"></div>';
     this.setOptions=function(o){Object.assign(this,o);}; this.setZoom=function(z){this._z=z;};
     this.getZoom=function(){return this._z;}; this.setCenter=function(){}; this.panTo=function(){};
-    this.fitBounds=function(b,p){ window.__lastFit={b:b,p:p}; }; this.addListener=function(){}; },
-  Marker:function(o){ this.o=o; this.addListener=function(e,fn){ var p=document.getElementById('stub-pin'); if(p) p.onclick=fn; };
+    this.fitBounds=function(b,p){ window.__lastFit={b:b,p:p}; };
+    this.addListener=function(ev,fn){ if(ev==='idle'){ window.__idle.push(fn); setTimeout(fn,0); } }; },
+  Marker:function(o){ this.o=o; this.__clicks=[]; this.__on = !!o.map;
+    window.__markers = window.__markers || []; window.__markers.push(this);
+    this.setMap=function(m){ this.__on = !!m; };
+    this.addListener=function(e,fn){ this.__clicks.push(fn); };
     this.setAnimation=function(){}; },
 }};
+window.__clusterState = function(){
+  var ms = window.__markers || [];
+  var on = ms.filter(function(m){ return m.__on; });
+  return { bubbles: on.filter(function(m){ return m.o && m.o.label; })
+                      .map(function(m){ return m.o.label.text; }),
+           pins: on.filter(function(m){ return m.o && m.o.icon && m.o.icon.url; }).length };
+};
 if (window.__fawakyMapsReady) window.__fawakyMapsReady();
 `;
 
@@ -71,6 +95,11 @@ async function run(label, { grant, forceStatus }) {
     rowHidden: (document.querySelector('.ls-station-dist') || {}).hidden,
     cardOpen: !!document.querySelector('.ls-station-card.is-open'),
     dot: !!document.querySelector('.ls-you-dot'),
+    cluster: window.__clusterState(),
+    rowsTotal: document.querySelectorAll('.ls-station-row').length,
+    rowsVisible: Array.from(document.querySelectorAll('.ls-station-row')).filter(r => !r.hidden).length,
+    firstRow: (document.querySelector('.ls-station-row:not([hidden]) .ls-station-name') || {}).textContent || '',
+    toggle: (document.querySelector('.ls-stations-more') || {}).textContent || '',
     hintVisible: (() => { const h = document.getElementById('stations-hint');
       return h ? getComputedStyle(h).opacity === '1' : false; })(),
   }));
@@ -108,6 +137,6 @@ await run('req-denied', { grant: true, forceStatus: 'PERMISSION_DENIED: Routes A
 await browser.close();
 for (const r of out) {
   const c = r.collapsed;
-  console.log(`${r.label.padEnd(11)} COLLAPSED lines=${c.lines} dot=${c.dot} row="${c.rowDist}" card=${c.cardOpen} hint=${c.hintVisible}`);
+  console.log(`${r.label.padEnd(11)} COLLAPSED lines=${c.lines} dot=${c.dot} rows=${c.rowsVisible}/${c.rowsTotal} first="${c.firstRow}" bubbles=[${c.cluster.bubbles}] pins=${c.cluster.pins} toggle="${c.toggle}" card=${c.cardOpen} hint=${c.hintVisible}`);
   console.log(`${''.padEnd(11)} EXPANDED  lines=${r.lines} calls=${r.calls}->${r.callsAfterSecond} card=${r.cardOpen} afterCollapse=${r.afterCollapse} errors=${r.loud}`);
 }

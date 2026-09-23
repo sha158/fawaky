@@ -4,6 +4,7 @@
 
 import {
   STATIONS, MAP_CENTER, MAP_ZOOM, FOCUS_ZOOM, directionsUrl, nearestStation,
+  stationsByDistance,
 } from './stations-data.js';
 // Imported, not a runtime '/assets/...' string: that way Vite emits and hashes
 // the file. A bare path resolves in dev but 404s in the production build.
@@ -208,9 +209,15 @@ function makeYouAreHere(map, lat, lng) {
 
 /* ─── List ─────────────────────────────────────────────── */
 
+const VISIBLE_ROWS = 4; // nearest few; the rest sit behind the expander
+
+/* Builds every row once and reorders by moving nodes, so listeners and the distance
+   text survive a re-sort. Returns handles the map side uses to talk back to it. */
 function renderList(listEl, onSelect) {
   listEl.innerHTML = '';
   const rows = new Map();
+  const items = new Map(); // station.id -> <li>
+  let expanded = false;
 
   STATIONS.forEach((station) => {
     const li = document.createElement('li');
@@ -235,9 +242,59 @@ function renderList(listEl, onSelect) {
     li.appendChild(btn);
     listEl.appendChild(li);
     rows.set(station.id, btn);
+    items.set(station.id, li);
   });
 
-  return rows;
+  const toggle = document.createElement('button');
+  toggle.type = 'button';
+  toggle.className = 'ls-stations-more';
+  listEl.after(toggle);
+
+  const applyVisibility = () => {
+    let i = 0;
+    items.forEach((li) => {
+      li.hidden = !expanded && i >= VISIBLE_ROWS;
+      i += 1;
+    });
+    toggle.textContent = expanded ? 'Show fewer' : `Show all ${STATIONS.length}`;
+    toggle.setAttribute('aria-expanded', String(expanded));
+    toggle.hidden = STATIONS.length <= VISIBLE_ROWS;
+  };
+
+  toggle.addEventListener('click', () => { expanded = !expanded; applyVisibility(); });
+  applyVisibility();
+
+  return {
+    rows,
+    /* Reorder in place by distance. Moving the existing nodes keeps their listeners
+       and any distance text already written to them. */
+    sortBy(order) {
+      order.forEach(({ station }) => {
+        const li = items.get(station.id);
+        if (li) listEl.appendChild(li);
+      });
+      const reordered = new Map();
+      order.forEach(({ station }) => reordered.set(station.id, items.get(station.id)));
+      items.clear();
+      reordered.forEach((li, id) => items.set(id, li));
+      applyVisibility();
+    },
+    setDistance(stationId, text) {
+      const btn = rows.get(stationId);
+      const el = btn && btn.querySelector('.ls-station-dist');
+      if (!el) return;
+      el.textContent = text;
+      el.hidden = !text;
+    },
+    reveal(stationId) {
+      if (items.has(stationId) && items.get(stationId).hidden) {
+        expanded = true;
+        applyVisibility();
+      }
+      const li = items.get(stationId);
+      if (li) li.scrollIntoView({ block: 'nearest', behavior: reducedMotion ? 'auto' : 'smooth' });
+    },
+  };
 }
 
 /* ─── Selected-station card ────────────────────────────── */
@@ -357,7 +414,7 @@ function initExpand(map, stage, wrap, refocus, onExpand, onCollapse) {
 
 /* ─── Map ──────────────────────────────────────────────── */
 
-function initMap(mapEl, stage, wrap, rows) {
+function initMap(mapEl, stage, wrap, list) {
   const map = new google.maps.Map(mapEl, {
     center: MAP_CENTER,
     zoom: MAP_ZOOM,
@@ -375,7 +432,7 @@ function initMap(mapEl, stage, wrap, rows) {
   let expanded = false;
 
   const setActive = (id) => {
-    rows.forEach((btn, key) => btn.classList.toggle('is-active', key === id));
+    list.rows.forEach((btn, key) => btn.classList.toggle('is-active', key === id));
   };
 
   /* Centre a point in the strip above the bottom sheet rather than behind it, by
@@ -450,13 +507,7 @@ function initMap(mapEl, stage, wrap, rows) {
     frameMap();
   };
 
-  const setRowDistance = (stationId, text) => {
-    const btn = rows.get(stationId);
-    const el = btn && btn.querySelector('.ls-station-dist');
-    if (!el) return;
-    el.textContent = text;
-    el.hidden = !text;
-  };
+  const setRowDistance = (stationId, text) => list.setDistance(stationId, text);
 
   const select = (station) => {
     const marker = markers.get(station.id);
@@ -485,6 +536,14 @@ function initMap(mapEl, stage, wrap, rows) {
     // to see where they are relative to the station.
     if (!youAreHere) youAreHere = makeYouAreHere(map, origin.lat, origin.lng);
 
+    // Straight-line distances are free, so every row gets one and the list reorders
+    // nearest-first. Only the nearest station gets a billed road route.
+    const ranked = stationsByDistance(origin);
+    list.sortBy(ranked);
+    ranked.forEach(({ station: st, km }) => {
+      if (km != null) list.setDistance(st.id, `${km < 1 ? `${Math.round(km * 1000)} m` : `${km.toFixed(1)} km`} away`);
+    });
+
     const station = nearestStation(origin);
     if (!station) return;
 
@@ -508,10 +567,21 @@ function initMap(mapEl, stage, wrap, rows) {
     frameMap(mode);
   };
 
+  /* ── Clustering ──
+     Screen-space grouping rather than @googlemaps/markerclusterer: that package is
+     ~1 MB unpacked and pulls in supercluster, built for thousands of points. At this
+     scale the whole algorithm is one pass, and doing it here lets the bubble carry
+     brand styling and handle coincident outlets properly. */
+  const CLUSTER_PX = 64;
+  let clusterMarkers = [];
+  // An idle overlay purely to borrow its lat/lng -> pixel projection.
+  const projector = new google.maps.OverlayView();
+  projector.draw = () => {};
+  projector.setMap(map);
+
   STATIONS.forEach((station) => {
     const marker = new google.maps.Marker({
       position: { lat: station.lat, lng: station.lng },
-      map,
       title: `${station.name} — ${station.area}`,
       icon: {
         url: PIN,
@@ -522,6 +592,88 @@ function initMap(mapEl, stage, wrap, rows) {
     marker.addListener('click', () => select(station));
     markers.set(station.id, marker);
   });
+
+  const clusterIcon = (count) => ({
+    path: google.maps.SymbolPath.CIRCLE,
+    scale: count > 9 ? 24 : 20, // a touch wider so two digits still fit
+    fillColor: ROUTE_LINE.color,
+    fillOpacity: 1,
+    strokeColor: '#FFFFFF',
+    strokeWeight: 3,
+  });
+
+  const groupStations = () => {
+    const projection = projector.getProjection();
+    if (!projection) return null;
+    const groups = [];
+    STATIONS.forEach((station) => {
+      const pt = projection.fromLatLngToDivPixel(
+        new google.maps.LatLng(station.lat, station.lng));
+      if (!pt) return;
+      const hit = groups.find((g) => Math.hypot(g.x - pt.x, g.y - pt.y) <= CLUSTER_PX);
+      if (hit) {
+        hit.members.push(station);
+        hit.x = (hit.x * (hit.members.length - 1) + pt.x) / hit.members.length;
+        hit.y = (hit.y * (hit.members.length - 1) + pt.y) / hit.members.length;
+      } else {
+        groups.push({ x: pt.x, y: pt.y, members: [station] });
+      }
+    });
+    return groups;
+  };
+
+  const onClusterClick = (members) => {
+    const bounds = new google.maps.LatLngBounds();
+    members.forEach((m) => bounds.extend({ lat: m.lat, lng: m.lng }));
+    const ne = bounds.getNorthEast();
+    const sw = bounds.getSouthWest();
+    // Effectively one point (Hotel Badriya and H.N Store are 2.1 m apart): no zoom
+    // level will ever separate them, so send the visitor to the list instead.
+    const degenerate = Math.abs(ne.lat() - sw.lat()) < 0.0005
+      && Math.abs(ne.lng() - sw.lng()) < 0.0005;
+    if (degenerate) {
+      members.forEach((m) => list.rows.get(m.id) && list.rows.get(m.id).classList.add('is-flagged'));
+      list.reveal(members[0].id);
+      setTimeout(() => members.forEach((m) => {
+        const btn = list.rows.get(m.id);
+        if (btn) btn.classList.remove('is-flagged');
+      }), 2200);
+      return;
+    }
+    map.fitBounds(bounds, 80);
+  };
+
+  const renderClusters = () => {
+    const groups = groupStations();
+    if (!groups) return;
+    clusterMarkers.forEach((m) => m.setMap(null));
+    clusterMarkers = [];
+    markers.forEach((m) => m.setMap(null));
+
+    groups.forEach((group) => {
+      if (group.members.length === 1) {
+        markers.get(group.members[0].id).setMap(map);
+        return;
+      }
+      const centre = {
+        lat: group.members.reduce((t, m) => t + m.lat, 0) / group.members.length,
+        lng: group.members.reduce((t, m) => t + m.lng, 0) / group.members.length,
+      };
+      const bubble = new google.maps.Marker({
+        position: centre,
+        map,
+        icon: clusterIcon(group.members.length),
+        label: { text: String(group.members.length), color: '#FFFFFF', fontWeight: '700', fontSize: '14px' },
+        title: group.members.map((m) => m.name).join(', '),
+        zIndex: 50,
+      });
+      bubble.addListener('click', () => onClusterClick(group.members));
+      clusterMarkers.push(bubble);
+    });
+  };
+
+  google.maps.event.addListenerOnce(projector, 'ready', renderClusters);
+  map.addListener('idle', renderClusters);
 
   // More than one outlet: frame them all instead of trusting a hardcoded centre.
   if (STATIONS.length > 1) {
@@ -553,7 +705,7 @@ export default function initStations() {
   const stage = document.getElementById('stations-stage');
   const wrap = stage ? stage.parentElement : mapEl.parentElement;
   let select = null;
-  const rows = renderList(listEl, (station) => {
+  const list = renderList(listEl, (station) => {
     if (select) select(station);
     else window.open(directionsUrl(station), '_blank', 'noopener');
   });
@@ -581,7 +733,7 @@ export default function initStations() {
     if (started) return;
     started = true;
     loadMapsApi()
-      .then(() => { select = initMap(mapEl, stage, wrap, rows); })
+      .then(() => { select = initMap(mapEl, stage, wrap, list); })
       .catch((err) => {
         console.warn('[fawaky] stations map unavailable:', err.message);
         renderFallback(wrap);
