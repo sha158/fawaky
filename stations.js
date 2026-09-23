@@ -617,9 +617,11 @@ function initMap(mapEl, stage, wrap, list) {
     // nearest-first. Only the nearest station gets a billed road route.
     const ranked = stationsByDistance(origin);
     list.sortBy(ranked);
+    const asLine = (km) => (km < 1 ? `${Math.round(km * 1000)} m` : `${km.toFixed(1)} km`);
     ranked.forEach(({ station: st, km }) => {
-      if (km != null) list.setDistance(st.id, `${km < 1 ? `${Math.round(km * 1000)} m` : `${km.toFixed(1)} km`} away`);
+      if (km != null) list.setDistance(st.id, `${asLine(km)} away`);
     });
+    const nearestKm = ranked.length ? ranked[0].km : null;
 
     const station = nearestStation(origin);
     if (!station) return;
@@ -630,7 +632,9 @@ function initMap(mapEl, stage, wrap, list) {
     pinnedId = station.id;
     renderClusters();
     drawRoute(route);
-    setRowDistance(station.id, `${route.distance} · ${route.duration}`);
+    setRowDistance(station.id, nearestKm != null
+      ? `${asLine(nearestKm)} away · ${route.duration} drive`
+      : `${route.distance} · ${route.duration}`);
     setActive(station.id);
 
     if (expanded) {
