@@ -457,9 +457,11 @@ function initMap(mapEl, stage, wrap, list) {
   let youAreHere = null;
 
   // The expanded view has a bottom sheet to clear; the collapsed tile does not.
+  // Generous top padding: the hint pill sits over the top-left of the map, and the
+  // route's origin was landing underneath it.
   const PAD = {
-    collapsed: { top: 40, right: 24, bottom: 40, left: 24 },
-    expanded: { top: 72, right: 40, bottom: 220, left: 40 },
+    collapsed: { top: 78, right: 28, bottom: 44, left: 28 },
+    expanded: { top: 104, right: 40, bottom: 220, left: 40 },
   };
 
   /* Three states to frame, not two: a drawn route wins over everything, because
@@ -510,6 +512,8 @@ function initMap(mapEl, stage, wrap, list) {
   const setRowDistance = (stationId, text) => list.setDistance(stationId, text);
 
   const select = (station) => {
+    pinnedId = station.id;
+    renderClusters();
     const marker = markers.get(station.id);
     focusOn(station.lat, station.lng);
     if (marker && !reducedMotion) {
@@ -550,6 +554,8 @@ function initMap(mapEl, stage, wrap, list) {
     const route = await fetchRoute(origin, station);
     if (!route) return;
 
+    pinnedId = station.id;
+    renderClusters();
     drawRoute(route);
     setRowDistance(station.id, `${route.distance} · ${route.duration}`);
     setActive(station.id);
@@ -602,11 +608,17 @@ function initMap(mapEl, stage, wrap, list) {
     strokeWeight: 3,
   });
 
+  // The station the visitor is being routed to is never clustered: it is the one
+  // marker that has to stay recognisable, and a generic count bubble at the end of
+  // the route defeats the whole point of the branded pin.
+  let pinnedId = null;
+
   const groupStations = () => {
     const projection = projector.getProjection();
     if (!projection) return null;
     const groups = [];
     STATIONS.forEach((station) => {
+      if (station.id === pinnedId) return;
       const pt = projection.fromLatLngToDivPixel(
         new google.maps.LatLng(station.lat, station.lng));
       if (!pt) return;
@@ -649,6 +661,8 @@ function initMap(mapEl, stage, wrap, list) {
     clusterMarkers.forEach((m) => m.setMap(null));
     clusterMarkers = [];
     markers.forEach((m) => m.setMap(null));
+
+    if (pinnedId && markers.has(pinnedId)) markers.get(pinnedId).setMap(map);
 
     groups.forEach((group) => {
       if (group.members.length === 1) {
