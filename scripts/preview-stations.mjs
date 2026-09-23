@@ -39,15 +39,29 @@ for (const { name, width, height } of SHOTS) {
     scrollLocked = await page.evaluate(() => document.body.classList.contains('is-map-expanded'));
     await page.screenshot({ path: `scripts/preview-stations-${name}-expanded.png` });
 
-    // Click the pin's bubble, not the bounding-box centre -- that lands on the
-    // teardrop's transparent tip and misses Google's hit area.
-    const pin = page.locator('#stations-map img[src*="map-pin"]').first();
-    const box = await pin.boundingBox();
-    if (box) await page.mouse.click(box.x + box.width / 2, box.y + box.height * 0.35);
+    // Click a pin that is actually on screen. With several stations, the first
+    // marker in DOM order may be clustered away or sitting outside the viewport,
+    // and clicking its reported box then hits nothing.
+    // Aim at the bubble rather than the bounding-box centre -- the centre lands on
+    // the teardrop's transparent tip, outside Google's hit area.
+    const pins = page.locator('#stations-map img[src*="map-pin"]');
+    const n = await pins.count();
+    let clickedPin = false;
+    for (let i = 0; i < n; i += 1) {
+      const box = await pins.nth(i).boundingBox();
+      if (!box) continue;
+      const cx = box.x + box.width / 2;
+      const cy = box.y + box.height * 0.35;
+      if (cx < 0 || cy < 0 || cx > width || cy > height) continue;
+      await page.mouse.click(cx, cy);
+      clickedPin = true;
+      break;
+    }
     await page.waitForTimeout(2000);
     const cardOpen = await page.locator('.ls-station-card').isVisible();
     const cta = await page.locator('.ls-station-card-cta').getAttribute('href').catch(() => '');
-    const ctaOk = /destination=12\.855757/.test(cta || '');
+    // Any station's coordinates, not one hardcoded outlet.
+    const ctaOk = /destination=-?\d+\.\d+,-?\d+\.\d+/.test(cta || '') && clickedPin;
     await page.screenshot({ path: `scripts/preview-stations-${name}-expanded-card.png` });
 
     // Escape should restore the tile.
