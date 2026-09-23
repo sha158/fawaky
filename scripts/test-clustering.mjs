@@ -24,7 +24,7 @@ for (const z of [6000, 24000, 96000, 400000]) {
     window.__idle.forEach(fn => fn());
     return window.__clusterState();
   }, z);
-  console.log(`px/deg ${String(z).padStart(6)}  bubbles=[${st.bubbles}] singlePins=${st.pins}  (total ${st.bubbles.reduce((a,c)=>a+ +c,0)+st.pins})`);
+  console.log(`px/deg ${String(z).padStart(6)}  pins=${st.pins}/11 bubbles=${st.bubbles.length} leaders=${st.leaders} minSeparation=${st.minSep}px`);
 }
 
 // Zoom right in, then click the Badriya/H.N bubble that can never split.

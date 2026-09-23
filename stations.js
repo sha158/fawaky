@@ -59,34 +59,62 @@ function loadMapsApi() {
 
 let positionPromise = null;
 
+function askBrowserForPosition() {
+  return new Promise((resolve) => {
+    navigator.geolocation.getCurrentPosition(
+      (pos) => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+      () => resolve(null), // denied, unavailable or timed out — all the same to us
+      // A café locator does not need GPS precision, and low accuracy is far
+      // faster and kinder to battery.
+      { enableHighAccuracy: false, timeout: 8000, maximumAge: 300000 },
+    );
+  });
+}
+
+/* Has the visitor hard-blocked us? Distinguishes "dismissed, could ask again" from
+   "blocked in site settings", which no amount of JavaScript can reopen. */
+async function locationBlocked() {
+  try {
+    const status = await navigator.permissions.query({ name: 'geolocation' });
+    return status.state === 'denied';
+  } catch {
+    return false; // Permissions API unavailable — assume we may ask
+  }
+}
+
 /* Resolves {lat,lng} or null. Never rejects — a missing location is an ordinary
-   outcome here, not an error. Runs at most once per page load. */
+   outcome here, not an error.
+
+   Only a SUCCESSFUL lookup is memoised. A null result stays retryable, because the
+   visitor may grant permission later via the locate button; caching the failure
+   forever is what made the feature vanish with no way back. */
 function getPosition() {
   if (positionPromise) return positionPromise;
 
-  positionPromise = (async () => {
+  const attempt = (async () => {
     if (!navigator.geolocation) return null;
-
-    // Ask the Permissions API first. If the visitor already said no, we must not
-    // call getCurrentPosition -- that is what re-triggers the prompt on every
-    // expand. Not every browser implements this, hence the try.
-    try {
-      const status = await navigator.permissions.query({ name: 'geolocation' });
-      if (status.state === 'denied') return null;
-    } catch { /* Permissions API unavailable — fall through and just ask */ }
-
-    return new Promise((resolve) => {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
-        () => resolve(null), // denied, unavailable or timed out — all the same to us
-        // A café locator does not need GPS precision, and low accuracy is far
-        // faster and kinder to battery.
-        { enableHighAccuracy: false, timeout: 8000, maximumAge: 300000 },
-      );
-    });
+    // Never call getCurrentPosition when already blocked: it cannot prompt, and on
+    // some browsers repeated calls count against the site.
+    if (await locationBlocked()) return null;
+    return askBrowserForPosition();
   })();
 
+  positionPromise = attempt.then((pos) => {
+    if (!pos) positionPromise = null; // keep it retryable
+    return pos;
+  });
+
   return positionPromise;
+}
+
+/* Explicit retry from a real click — the case browsers treat most favourably, and
+   the only thing that can revive a dismissed (as opposed to blocked) prompt. */
+async function requestPositionFromClick() {
+  if (!navigator.geolocation) return { pos: null, blocked: false };
+  if (await locationBlocked()) return { pos: null, blocked: true };
+  const pos = await askBrowserForPosition();
+  if (pos) positionPromise = Promise.resolve(pos);
+  return { pos, blocked: !pos && await locationBlocked() };
 }
 
 /* Warm the location up on the visitor's first interaction, well before they reach
@@ -532,9 +560,39 @@ function initMap(mapEl, stage, wrap, list) {
      While collapsed this deliberately does NOT open the card or mark the stage
      selected. The card would cover most of a 380px tile, and `is-selected` hides
      the "Tap the pin" hint before the visitor has done anything at all. */
+  const locateWrap = stage.querySelector('#stations-locate-wrap');
+  const locateBtn = stage.querySelector('#stations-locate');
+  const locateNote = stage.querySelector('#stations-locate-note');
+
+  const showLocate = (show) => { if (locateWrap) locateWrap.hidden = !show; };
+
+  if (locateBtn) {
+    locateBtn.addEventListener('click', async () => {
+      locateBtn.disabled = true;
+      locateBtn.textContent = 'Locating…';
+      const { pos, blocked } = await requestPositionFromClick();
+      locateBtn.disabled = false;
+      locateBtn.textContent = 'Use my location';
+      if (pos) {
+        showLocate(false);
+        maybeRoute();
+        return;
+      }
+      if (locateNote) {
+        // Nothing in JavaScript can reopen a hard-blocked prompt, so say so plainly
+        // rather than leaving the button looking broken.
+        locateNote.textContent = blocked
+          ? 'Location is blocked for this site. Enable it in your browser\u2019s site settings to see your route.'
+          : 'Could not get your location. Please try again.';
+        locateNote.hidden = false;
+      }
+    });
+  }
+
   const maybeRoute = async () => {
     const origin = await getPosition();
-    if (!origin) return;
+    if (!origin) { showLocate(true); return; }
+    showLocate(false);
 
     // Independent of routing: if the route fails, the visitor should still be able
     // to see where they are relative to the station.
@@ -578,8 +636,7 @@ function initMap(mapEl, stage, wrap, list) {
      ~1 MB unpacked and pulls in supercluster, built for thousands of points. At this
      scale the whole algorithm is one pass, and doing it here lets the bubble carry
      brand styling and handle coincident outlets properly. */
-  const CLUSTER_PX = 64;
-  let clusterMarkers = [];
+  const CLUSTER_PX = 88;
   // An idle overlay purely to borrow its lat/lng -> pixel projection.
   const projector = new google.maps.OverlayView();
   projector.draw = () => {};
@@ -599,26 +656,16 @@ function initMap(mapEl, stage, wrap, list) {
     markers.set(station.id, marker);
   });
 
-  const clusterIcon = (count) => ({
-    path: google.maps.SymbolPath.CIRCLE,
-    scale: count > 9 ? 24 : 20, // a touch wider so two digits still fit
-    fillColor: ROUTE_LINE.color,
-    fillOpacity: 1,
-    strokeColor: '#FFFFFF',
-    strokeWeight: 3,
-  });
-
-  // The station the visitor is being routed to is never clustered: it is the one
-  // marker that has to stay recognisable, and a generic count bubble at the end of
-  // the route defeats the whole point of the branded pin.
+  // The station the visitor is being routed to is never fanned: it is the one
+  // marker that has to stay on its true coordinate, since the polyline ends there.
   let pinnedId = null;
 
+  /* Groups stations whose pins would collide on screen at the current zoom. */
   const groupStations = () => {
     const projection = projector.getProjection();
     if (!projection) return null;
     const groups = [];
     STATIONS.forEach((station) => {
-      if (station.id === pinnedId) return;
       const pt = projection.fromLatLngToDivPixel(
         new google.maps.LatLng(station.lat, station.lng));
       if (!pt) return;
@@ -634,55 +681,71 @@ function initMap(mapEl, stage, wrap, list) {
     return groups;
   };
 
-  const onClusterClick = (members) => {
-    const bounds = new google.maps.LatLngBounds();
-    members.forEach((m) => bounds.extend({ lat: m.lat, lng: m.lng }));
-    const ne = bounds.getNorthEast();
-    const sw = bounds.getSouthWest();
-    // Effectively one point (Hotel Badriya and H.N Store are 2.1 m apart): no zoom
-    // level will ever separate them, so send the visitor to the list instead.
-    const degenerate = Math.abs(ne.lat() - sw.lat()) < 0.0005
-      && Math.abs(ne.lng() - sw.lng()) < 0.0005;
-    if (degenerate) {
-      members.forEach((m) => list.rows.get(m.id) && list.rows.get(m.id).classList.add('is-flagged'));
-      list.reveal(members[0].id);
-      setTimeout(() => members.forEach((m) => {
-        const btn = list.rows.get(m.id);
-        if (btn) btn.classList.remove('is-flagged');
-      }), 2200);
-      return;
-    }
-    map.fitBounds(bounds, 80);
+  /* Spiderfy rather than cluster. The outlets are genuinely too close to draw at
+     true coordinates -- 17 of the 55 pairs sit under one pin-width at default zoom,
+     and five Adyar Kannur shops land 2-4px apart -- so drawing them raw would hide
+     four of five behind the fifth. Fanning keeps every pin visible and tappable, and
+     a leader line back to the true coordinate keeps it honest. */
+  const FAN_START = -Math.PI / 2; // first pin sits above the centroid
+  let leaderLines = [];
+
+  const clearLeaders = () => {
+    leaderLines.forEach((l) => l.setMap(null));
+    leaderLines = [];
   };
 
   const renderClusters = () => {
+    const projection = projector.getProjection();
     const groups = groupStations();
-    if (!groups) return;
-    clusterMarkers.forEach((m) => m.setMap(null));
-    clusterMarkers = [];
-    markers.forEach((m) => m.setMap(null));
+    if (!projection || !groups) return;
+    clearLeaders();
 
-    if (pinnedId && markers.has(pinnedId)) markers.get(pinnedId).setMap(map);
+    const place = (station, position, displaced) => {
+      const marker = markers.get(station.id);
+      marker.setPosition(position);
+      marker.setMap(map);
+      if (!displaced) return;
+      leaderLines.push(new google.maps.Polyline({
+        path: [position, { lat: station.lat, lng: station.lng }],
+        map,
+        strokeColor: '#92B83D',
+        strokeOpacity: 0.85,
+        strokeWeight: 2,
+        zIndex: 1,
+      }));
+    };
 
     groups.forEach((group) => {
       if (group.members.length === 1) {
-        markers.get(group.members[0].id).setMap(map);
+        const only = group.members[0];
+        place(only, { lat: only.lat, lng: only.lng }, false);
         return;
       }
-      const centre = {
-        lat: group.members.reduce((t, m) => t + m.lat, 0) / group.members.length,
-        lng: group.members.reduce((t, m) => t + m.lng, 0) / group.members.length,
-      };
-      const bubble = new google.maps.Marker({
-        position: centre,
-        map,
-        icon: clusterIcon(group.members.length),
-        label: { text: String(group.members.length), color: '#FFFFFF', fontWeight: '700', fontSize: '14px' },
-        title: group.members.map((m) => m.name).join(', '),
-        zIndex: 50,
+
+      // The routed destination stays on its true coordinate -- the polyline ends
+      // there -- so when it is in a group it anchors the fan and everyone else
+      // arranges around it rather than around the centroid.
+      const anchor = group.members.find((m) => m.id === pinnedId);
+      const fanned = group.members.filter((m) => m.id !== pinnedId);
+      let cx = group.x;
+      let cy = group.y;
+
+      if (anchor) {
+        const pt = projection.fromLatLngToDivPixel(
+          new google.maps.LatLng(anchor.lat, anchor.lng));
+        cx = pt.x;
+        cy = pt.y;
+        place(anchor, { lat: anchor.lat, lng: anchor.lng }, false);
+      }
+
+      const radius = 30 + 10 * (fanned.length + (anchor ? 1 : 0));
+      fanned.forEach((station, i) => {
+        const angle = FAN_START + (2 * Math.PI * i) / fanned.length;
+        place(station, projection.fromDivPixelToLatLng(new google.maps.Point(
+          cx + radius * Math.cos(angle),
+          cy + radius * Math.sin(angle),
+        )), true);
       });
-      bubble.addListener('click', () => onClusterClick(group.members));
-      clusterMarkers.push(bubble);
     });
   };
 

@@ -28,9 +28,15 @@ window.google = { maps: {
   OverlayView: class {
     setMap(m){ if(m){ this.onAdd&&this.onAdd(); this.draw&&this.draw(); } else { this.onRemove&&this.onRemove(); } }
     getPanes(){ return { floatPane: document.getElementById('stations-map') }; }
-    getProjection(){ return { fromLatLngToDivPixel: function(ll){
-      return { x: (ll.__lng - 74.85) * window.__pxPerDeg, y: (12.88 - ll.__lat) * window.__pxPerDeg };
-    } }; }
+    getProjection(){ return {
+      fromLatLngToDivPixel: function(ll){
+        return { x: (ll.__lng - 74.85) * window.__pxPerDeg, y: (12.88 - ll.__lat) * window.__pxPerDeg };
+      },
+      fromDivPixelToLatLng: function(pt){
+        return { lat: 12.88 - pt.y / window.__pxPerDeg, lng: 74.85 + pt.x / window.__pxPerDeg,
+                 __lat: 12.88 - pt.y / window.__pxPerDeg, __lng: 74.85 + pt.x / window.__pxPerDeg };
+      }
+    }; }
   },
   Polyline:function(o){ this.o=o; window.__polylines.push(this);
     this.setMap=function(m){ if(m===null) window.__polylines=window.__polylines.filter(function(p){return p!==this;},this); }; },
@@ -49,7 +55,8 @@ window.google = { maps: {
     this.getZoom=function(){return this._z;}; this.setCenter=function(){}; this.panTo=function(){};
     this.fitBounds=function(b,p){ window.__lastFit={b:b,p:p}; };
     this.addListener=function(ev,fn){ if(ev==='idle'){ window.__idle.push(fn); setTimeout(fn,0); } }; },
-  Marker:function(o){ this.o=o; this.__clicks=[]; this.__on = !!o.map;
+  Marker:function(o){ this.o=o; this.__clicks=[]; this.__on = !!o.map; this.__pos = o.position;
+    this.setPosition=function(p){ this.__pos = p; };
     window.__markers = window.__markers || []; window.__markers.push(this);
     this.setMap=function(m){ this.__on = !!m; };
     this.addListener=function(e,fn){ this.__clicks.push(fn); };
@@ -58,9 +65,22 @@ window.google = { maps: {
 window.__clusterState = function(){
   var ms = window.__markers || [];
   var on = ms.filter(function(m){ return m.__on; });
+  var pins = on.filter(function(m){ return m.o && m.o.icon && m.o.icon.url; });
+  // Minimum on-screen separation between drawn pins — the whole point of fanning.
+  var minSep = Infinity, ppd = window.__pxPerDeg;
+  for (var i=0;i<pins.length;i++) for (var j=i+1;j<pins.length;j++) {
+    var a=pins[i].__pos, b=pins[j].__pos;
+    if(!a||!b) continue;
+    var dx=((b.lng!==undefined?b.lng:b.__lng)-(a.lng!==undefined?a.lng:a.__lng))*ppd;
+    var dy=((b.lat!==undefined?b.lat:b.__lat)-(a.lat!==undefined?a.lat:a.__lat))*ppd;
+    minSep = Math.min(minSep, Math.hypot(dx,dy));
+  }
+  var leaders = (window.__polylines||[]).filter(function(l){
+    return l.o && l.o.strokeColor === '#92B83D'; }).length;
   return { bubbles: on.filter(function(m){ return m.o && m.o.label; })
                       .map(function(m){ return m.o.label.text; }),
-           pins: on.filter(function(m){ return m.o && m.o.icon && m.o.icon.url; }).length };
+           pins: pins.length, leaders: leaders,
+           minSep: isFinite(minSep) ? Math.round(minSep) : null };
 };
 if (window.__fawakyMapsReady) window.__fawakyMapsReady();
 `;

@@ -4582,3 +4582,74 @@ body.is-map-expanded {
 @media (prefers-reduced-motion: reduce) {
   .ls-station-btn.is-flagged { animation: none; }
 }
+
+/* Recovery path when we have no location — shown only if the automatic attempt
+   produced nothing, so the map stays clean when it worked. */
+.ls-stations-locate-wrap {
+  position: absolute;
+  left: 14px;
+  bottom: 14px;
+  z-index: 2;
+  max-width: calc(100% - 28px);
+}
+
+.ls-stations-locate-wrap[hidden] {
+  display: none;
+}
+
+.ls-stations-locate {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 16px 10px 13px;
+  border: 0;
+  border-radius: 9999px;
+  background: var(--ls-primary);
+  color: #fff;
+  font-family: var(--font-body);
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(23, 0, 31, 0.32);
+  transition: background 0.3s var(--ease);
+}
+
+.ls-stations-locate:hover:not(:disabled) {
+  background: var(--ls-primary-hover);
+}
+
+.ls-stations-locate:disabled {
+  opacity: 0.7;
+  cursor: default;
+}
+
+.ls-stations-locate svg {
+  flex: none;
+  color: var(--fw-green);
+}
+
+.ls-stations-locate-note {
+  margin: 8px 0 0;
+  padding: 9px 13px;
+  border-radius: 12px;
+  background: rgba(23, 0, 31, 0.86);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  color: #fff;
+  font-family: var(--font-body);
+  font-size: var(--fs-2xs);
+  line-height: 1.45;
+}
+
+.ls-stations-locate-note[hidden] {
+  display: none;
+}
+
+.ls-stations-overlay .ls-stations-locate-wrap {
+  left: calc(14px + env(safe-area-inset-left));
+  bottom: calc(14px + env(safe-area-inset-bottom));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ls-stations-locate { transition: none; }
+}
