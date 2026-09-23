@@ -237,7 +237,9 @@ function makeYouAreHere(map, lat, lng) {
 
 /* ─── List ─────────────────────────────────────────────── */
 
-const VISIBLE_ROWS = 4; // nearest few; the rest sit behind the expander
+// Nearest few; the rest sit behind the expander. Desktop has the vertical room
+// beside a 520px map, so it shows more and fewer visitors need the toggle at all.
+const visibleRows = () => (window.matchMedia('(min-width: 1025px)').matches ? 6 : 4);
 
 /* Builds every row once and reorders by moving nodes, so listeners and the distance
    text survive a re-sort. Returns handles the map side uses to talk back to it. */
@@ -276,20 +278,28 @@ function renderList(listEl, onSelect) {
   const toggle = document.createElement('button');
   toggle.type = 'button';
   toggle.className = 'ls-stations-more';
-  listEl.after(toggle);
+
+  // The list and its toggle must be ONE grid child. Appending the button as a
+  // sibling made it a third item, so auto-placement handed it the map's column and
+  // pushed the map onto a second row at 320px wide.
+  const aside = document.createElement('div');
+  aside.className = 'ls-stations-aside';
+  listEl.replaceWith(aside);
+  aside.append(listEl, toggle);
 
   const applyVisibility = () => {
     let i = 0;
     items.forEach((li) => {
-      li.hidden = !expanded && i >= VISIBLE_ROWS;
+      li.hidden = !expanded && i >= visibleRows();
       i += 1;
     });
     toggle.textContent = expanded ? 'Show fewer' : `Show all ${STATIONS.length}`;
     toggle.setAttribute('aria-expanded', String(expanded));
-    toggle.hidden = STATIONS.length <= VISIBLE_ROWS;
+    toggle.hidden = STATIONS.length <= visibleRows();
   };
 
   toggle.addEventListener('click', () => { expanded = !expanded; applyVisibility(); });
+  window.matchMedia('(min-width: 1025px)').addEventListener('change', applyVisibility);
   applyVisibility();
 
   return {
@@ -371,12 +381,16 @@ function buildCard(stage) {
 
 function renderFallback(wrap) {
   wrap.classList.add('is-fallback');
-  wrap.innerHTML = STATIONS.map((s) => `
+  // Deliberately NOT a card per station: at 21 outlets that built a ~3,800px tower.
+  // The list beside the map already carries every outlet, and with no map to select
+  // on, its rows open directions directly — so this only has to explain itself.
+  const nearest = STATIONS[0];
+  wrap.innerHTML = `
     <div class="ls-station-fallback">
-      <h3 class="ls-station-card-name">${s.name}</h3>
-      <p class="ls-station-card-area">${s.area}</p>
-      <a class="ls-station-card-cta" href="${directionsUrl(s)}" target="_blank" rel="noopener">Get Directions</a>
-    </div>`).join('');
+      <h3 class="ls-station-card-name">Map unavailable</h3>
+      <p class="ls-station-card-area">Pick an outlet from the list for directions.</p>
+      ${nearest ? `<a class="ls-station-card-cta" href="${directionsUrl(nearest)}" target="_blank" rel="noopener">Directions to ${nearest.name}</a>` : ''}
+    </div>`;
 }
 
 /* ─── Expand to full screen ────────────────────────────── */

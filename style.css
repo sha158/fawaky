@@ -4653,3 +4653,11 @@ body.is-map-expanded {
 @media (prefers-reduced-motion: reduce) {
   .ls-stations-locate { transition: none; }
 }
+
+/* List and its toggle are a single grid child — as separate siblings the button
+   was auto-placed into the map's column. */
+.ls-stations-aside {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
