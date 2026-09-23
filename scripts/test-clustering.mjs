@@ -18,13 +18,14 @@ await p.waitForTimeout(2500);
 console.log('nearest to a Padil origin :', await p.evaluate(() =>
   (document.querySelector('.ls-station-row:not([hidden]) .ls-station-name')||{}).textContent));
 
+const total = await p.evaluate(() => document.querySelectorAll('.ls-station-row').length);
 for (const z of [6000, 24000, 96000, 400000]) {
   const st = await p.evaluate((px) => {
     window.__pxPerDeg = px;
     window.__idle.forEach(fn => fn());
     return window.__clusterState();
   }, z);
-  console.log(`px/deg ${String(z).padStart(6)}  pins=${st.pins}/11 bubbles=${st.bubbles.length} leaders=${st.leaders} minSeparation=${st.minSep}px`);
+  console.log(`px/deg ${String(z).padStart(6)}  pins=${st.pins}/${total} bubbles=${st.bubbles.length} leaders=${st.leaders} minSeparation=${st.minSep}px`);
 }
 
 // Zoom right in, then click the Badriya/H.N bubble that can never split.

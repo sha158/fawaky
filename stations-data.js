@@ -26,6 +26,22 @@ export const STATIONS = [
   { id: 'sri-durga-cake-palace', name: 'Sri Durga Cake Palace', area: 'Padil', lat: 12.8707240, lng: 74.8830935 },
   { id: 'hotel-junction', name: 'Hotel Junction', area: 'Padil — Mangalore Junction Station', lat: 12.8673950, lng: 74.8785475 },
 
+  // Naguri
+  { id: 'indian-grocery-hub-naguri-jn', name: 'Indian Grocery Hub (Naguri Junction)', area: 'Naguri', lat: 12.8702625, lng: 74.8750130 },
+  { id: 'ganesh-stores', name: 'Ganesh Stores', area: 'Naguri', lat: 12.8699222, lng: 74.8745144 },
+  { id: 'indian-grocery-hub-chick-n-grill', name: 'Indian Grocery Hub (opp. Hotel Chick n Grill)', area: 'Naguri', lat: 12.8697585, lng: 74.8731874 },
+  { id: 'garodi-excel-general-store', name: 'Garodi Excel General Store', area: 'Capitanio School Rd, Naguri', lat: 12.8695147, lng: 74.8698058 },
+
+  // Pumpwell
+  { id: 'mangalore-bakery', name: 'Mangalore Bakery', area: 'Pumpwell', lat: 12.8696575, lng: 74.8649590 },
+  { id: 'deepak-enterprises', name: 'Deepak Enterprises', area: 'Pumpwell', lat: 12.8694160, lng: 74.8651029 },
+  { id: 'mio-hospital-canteen', name: 'MIO Hospital Canteen', area: 'Pumpwell', lat: 12.8673345, lng: 74.8667417 },
+  { id: 'gl-bakery-ujjodi', name: 'G L Bakery', area: 'Ujjodi, Pumpwell', lat: 12.8648112, lng: 74.8659592 },
+
+  // Kankanady
+  { id: 'story-bakes', name: 'Story Bakes', area: 'Old Kankanady Rd', lat: 12.8689119, lng: 74.8625082 },
+  { id: 'swagath-sweets', name: 'Swagath Sweets', area: 'Kankanady', lat: 12.8681072, lng: 74.8579581 },
+
   // Nandigudda
   { id: 'royal-tea', name: 'Royal Tea', area: 'Nandigudda, Mangaluru', lat: 12.855757, lng: 74.8537288 },
 ];
