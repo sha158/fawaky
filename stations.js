@@ -494,10 +494,25 @@ function initMap(mapEl, stage, wrap, list) {
 
   /* Three states to frame, not two: a drawn route wins over everything, because
      a route the viewer cannot see is the same as no route at all. */
+  const allStationBounds = () => {
+    const b = new google.maps.LatLngBounds();
+    STATIONS.forEach((st) => b.extend({ lat: st.lat, lng: st.lng }));
+    return b;
+  };
+
   const frameMap = (mode) => {
     const m = mode || (expanded ? 'expanded' : 'collapsed');
     if (currentRoute && currentRoute.bounds) {
-      map.fitBounds(currentRoute.bounds, PAD[m]);
+      // Expanded is for following the route, so it frames just that. The tile is the
+      // overview: it frames every outlet AND the route, so the visitor can see the
+      // whole network and their own line through it at once.
+      if (m === 'expanded') {
+        map.fitBounds(currentRoute.bounds, PAD[m]);
+        return;
+      }
+      const both = allStationBounds();
+      both.union(currentRoute.bounds);
+      map.fitBounds(both, PAD[m]);
       return;
     }
     if (m === 'expanded') {

@@ -23,6 +23,7 @@ window.google = { maps: {
                                             Math.max.apply(null,pts.map(function(p){return p.lng;}))); };
     this.getSouthWest=function(){ return LL(Math.min.apply(null,pts.map(function(p){return p.lat;})),
                                             Math.min.apply(null,pts.map(function(p){return p.lng;}))); };
+    this.union=function(o){ if(o&&o.__pts) o.__pts.forEach(function(x){pts.push(x);}); return this; };
     this.__pts=pts; },
   event:{ trigger:function(){}, addListenerOnce:function(){} },
   OverlayView: class {
@@ -47,7 +48,7 @@ window.google = { maps: {
       if (window.__forceStatus) return Promise.reject(new Error(window.__forceStatus));
       return Promise.resolve({ routes:[{
         path:[LL(12.90,74.84),LL(12.88,74.85),LL(12.855757,74.8537288)],
-        viewport:{__b:true}, distanceMeters:5400, durationMillis:840000 }] });
+        viewport:(function(){var b=new window.google.maps.LatLngBounds();b.extend({lat:12.90,lng:74.84});b.extend({lat:12.855757,lng:74.8537288});return b;})(), distanceMeters:5400, durationMillis:840000 }] });
     }}});
   },
   Map:function(el,opts){ this._z=opts.zoom; el.style.background='#eef1e6'; el.style.position='relative';
