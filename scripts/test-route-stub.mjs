@@ -57,6 +57,7 @@ window.google = { maps: {
     this.addListener=function(ev,fn){ if(ev==='idle'){ window.__idle.push(fn); setTimeout(fn,0); } }; },
   Marker:function(o){ this.o=o; this.__clicks=[]; this.__on = !!o.map; this.__pos = o.position;
     this.setPosition=function(p){ this.__pos = p; };
+    this.setIcon=function(ic){ this.o.icon = ic; };
     window.__markers = window.__markers || []; window.__markers.push(this);
     this.setMap=function(m){ this.__on = !!m; };
     this.addListener=function(e,fn){ this.__clicks.push(fn); };

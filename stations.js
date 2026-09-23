@@ -636,21 +636,28 @@ function initMap(mapEl, stage, wrap, list) {
      ~1 MB unpacked and pulls in supercluster, built for thousands of points. At this
      scale the whole algorithm is one pass, and doing it here lets the bubble carry
      brand styling and handle coincident outlets properly. */
-  const CLUSTER_PX = 88;
+  // Collide at roughly the pin's own width — no wider, or unrelated pins chain
+  // into one enormous fan.
+  const clusterPx = () => pinWidth() + 6;
   // An idle overlay purely to borrow its lat/lng -> pixel projection.
   const projector = new google.maps.OverlayView();
   projector.draw = () => {};
   projector.setMap(map);
 
+  // A 56px pin covers ~900 m of ground at the overview zoom, so it shrinks when
+  // zoomed out and returns to full size once there is room for it.
+  const pinWidth = () => ((map.getZoom() || MAP_ZOOM) >= 15 ? 56 : 36);
+  const pinIcon = (w) => ({
+    url: PIN,
+    scaledSize: new google.maps.Size(w, Math.round(w * 1.25)),
+    anchor: new google.maps.Point(w / 2, Math.round(w * 1.25)),
+  });
+
   STATIONS.forEach((station) => {
     const marker = new google.maps.Marker({
       position: { lat: station.lat, lng: station.lng },
       title: `${station.name} — ${station.area}`,
-      icon: {
-        url: PIN,
-        scaledSize: new google.maps.Size(56, 70),
-        anchor: new google.maps.Point(28, 70),
-      },
+      icon: pinIcon(36),
     });
     marker.addListener('click', () => select(station));
     markers.set(station.id, marker);
@@ -669,7 +676,7 @@ function initMap(mapEl, stage, wrap, list) {
       const pt = projection.fromLatLngToDivPixel(
         new google.maps.LatLng(station.lat, station.lng));
       if (!pt) return;
-      const hit = groups.find((g) => Math.hypot(g.x - pt.x, g.y - pt.y) <= CLUSTER_PX);
+      const hit = groups.find((g) => Math.hypot(g.x - pt.x, g.y - pt.y) <= clusterPx());
       if (hit) {
         hit.members.push(station);
         hit.x = (hit.x * (hit.members.length - 1) + pt.x) / hit.members.length;
@@ -699,6 +706,8 @@ function initMap(mapEl, stage, wrap, list) {
     const groups = groupStations();
     if (!projection || !groups) return;
     clearLeaders();
+    const icon = pinIcon(pinWidth());
+    markers.forEach((m) => m.setIcon(icon));
 
     const place = (station, position, displaced) => {
       const marker = markers.get(station.id);
@@ -738,7 +747,11 @@ function initMap(mapEl, stage, wrap, list) {
         place(anchor, { lat: anchor.lat, lng: anchor.lng }, false);
       }
 
-      const radius = 30 + 10 * (fanned.length + (anchor ? 1 : 0));
+      // Smallest ring on which `n` pins of this width do not overlap, rather than a
+      // radius that grows unbounded and throws pins off the tile.
+      const n = Math.max(fanned.length, 2);
+      const w = pinWidth();
+      const radius = Math.max(22, Math.min(72, (w * 0.62) / (2 * Math.sin(Math.PI / n))));
       fanned.forEach((station, i) => {
         const angle = FAN_START + (2 * Math.PI * i) / fanned.length;
         place(station, projection.fromDivPixelToLatLng(new google.maps.Point(
