@@ -937,7 +937,29 @@ function initMap(mapEl, stage, wrap, list) {
 
     relax(nodes, w * 0.9);
 
+    /* Pushing pins apart can push them off the tile — the map framed itself before
+       any of this ran. Keep every pin inside the viewport, in the same pixel space
+       the projection works in. (The stub map in the tests has no getBounds; without
+       bounds there is nothing to clamp to and the pass is skipped.) */
+    const bounds = map.getBounds && map.getBounds();
+    const edge = bounds && (() => {
+      const ne = projection.fromLatLngToDivPixel(bounds.getNorthEast());
+      const sw = projection.fromLatLngToDivPixel(bounds.getSouthWest());
+      if (!ne || !sw) return null;
+      const inset = w * 0.75; // the pin is drawn above and either side of its point
+      return {
+        minX: Math.min(ne.x, sw.x) + inset,
+        maxX: Math.max(ne.x, sw.x) - inset,
+        minY: Math.min(ne.y, sw.y) + inset * 1.6, // taller above the point than below
+        maxY: Math.max(ne.y, sw.y) - 4,
+      };
+    })();
+
     nodes.forEach((node) => {
+      if (edge && edge.maxX > edge.minX && edge.maxY > edge.minY) {
+        node.x = Math.min(Math.max(node.x, edge.minX), edge.maxX);
+        node.y = Math.min(Math.max(node.y, edge.minY), edge.maxY);
+      }
       let dx = node.x - node.tx;
       let dy = node.y - node.ty;
       const away = Math.hypot(dx, dy);
