@@ -946,11 +946,14 @@ function initMap(mapEl, stage, wrap, list) {
       const ne = projection.fromLatLngToDivPixel(bounds.getNorthEast());
       const sw = projection.fromLatLngToDivPixel(bounds.getSouthWest());
       if (!ne || !sw) return null;
-      const inset = w * 0.75; // the pin is drawn above and either side of its point
+      // The pin hangs entirely ABOVE its point and half a width either side of it,
+      // so the top edge needs a whole pin's height of room and the bottom almost none.
+      const half = w / 2 + 4;
+      const tall = Math.round(w * 1.25) + 4;
       return {
-        minX: Math.min(ne.x, sw.x) + inset,
-        maxX: Math.max(ne.x, sw.x) - inset,
-        minY: Math.min(ne.y, sw.y) + inset * 1.6, // taller above the point than below
+        minX: Math.min(ne.x, sw.x) + half,
+        maxX: Math.max(ne.x, sw.x) - half,
+        minY: Math.min(ne.y, sw.y) + tall,
         maxY: Math.max(ne.y, sw.y) - 4,
       };
     })();
