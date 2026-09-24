@@ -39,6 +39,23 @@ const MAP_STYLE = [
 
 let loaderPromise = null;
 
+/* Why the map did not come up. Google names the real cause — RefererNotAllowed,
+   BillingNotEnabled, OverQuota, ApiNotActivated — only by console.error, and a
+   failure on someone else's phone never reaches us otherwise, so capture it here
+   and let ?mapdebug=1 print it in the panel. */
+const mapFailure = { code: null, detail: null };
+
+function watchMapErrors() {
+  const original = console.error;
+  console.error = function capture(...args) {
+    const text = args.map((a) => (a && a.message) || String(a)).join(' ');
+    const named = text.match(/\b(\w*MapError|InvalidKey\w*|ApiTargetBlocked\w*)\b/);
+    if (named && !mapFailure.code) mapFailure.code = named[1];
+    else if (!mapFailure.code && /Google Maps/i.test(text)) mapFailure.code = text.slice(0, 120);
+    return original.apply(console, args);
+  };
+}
+
 // A stalled request never fires onerror, so on a weak connection the tile would sit
 // empty for ever. Give up at this point and let the caller try again.
 const LOAD_TIMEOUT_MS = 15000;
@@ -443,6 +460,33 @@ function renderFallback(wrap, list) {
   const cta = wrap.querySelector('.ls-station-card-cta');
   wrap.querySelector('.ls-station-fallback-retry')
     .addEventListener('click', () => window.location.reload());
+
+  // ?mapdebug=1 — for a failure we cannot reproduce. Off by default: a visitor must
+  // never be shown an error code on a marketing page.
+  if (new URLSearchParams(window.location.search).has('mapdebug')) {
+    const diag = document.createElement('pre');
+    diag.className = 'ls-station-fallback-diag';
+    const conn = navigator.connection || {};
+    const gl = (() => {
+      try { return !!document.createElement('canvas').getContext('webgl'); } catch { return false; }
+    })();
+    const write = () => {
+      diag.textContent = [
+        `code   ${mapFailure.code || '(none logged)'}`,
+        `detail ${mapFailure.detail || '(none)'}`,
+        `key    ${API_KEY ? `set, ${API_KEY.length} chars` : 'MISSING'}`,
+        `maps   ${window.google && window.google.maps ? 'script loaded' : 'script never loaded'}`,
+        `net    ${navigator.onLine ? 'online' : 'offline'} ${conn.effectiveType || ''} ${conn.saveData ? 'data-saver' : ''}`,
+        `webgl  ${gl}`,
+        `clock  ${new Date().toISOString()}`,
+        `ua     ${navigator.userAgent}`,
+      ].join('\n');
+    };
+    write();
+    // Google's own error usually lands a beat after the failure hook.
+    [400, 1500, 4000].forEach((ms) => setTimeout(write, ms));
+    wrap.querySelector('.ls-station-fallback').appendChild(diag);
+  }
 
   // No map to draw a line on, so the nearest outlet is chosen here and Google Maps
   // is handed both ends — it opens with the route already drawn.
@@ -910,7 +954,10 @@ export default function initStations() {
   /* Key/referrer/billing problems do NOT reject the script promise — Google loads
      fine and then paints its own grey "Oops!" panel over the map. This is the only
      hook it gives us, and it has to exist before the script runs. */
+  watchMapErrors();
+
   window.gm_authFailure = () => {
+    mapFailure.detail = mapFailure.detail || 'gm_authFailure (key, referrer, billing, quota or API restriction)';
     console.warn('[fawaky] Google Maps rejected the API key (referrer, billing, quota or API restriction). Showing the static fallback.');
     renderFallback(wrap, list);
   };
@@ -930,6 +977,7 @@ export default function initStations() {
           setTimeout(() => attempt(n + 1), RETRY_MS[n]);
           return;
         }
+        mapFailure.detail = mapFailure.detail || (err && (err.stack || err.message));
         console.warn('[fawaky] stations map unavailable:', err.message);
         renderFallback(wrap, list);
       });

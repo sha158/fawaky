@@ -4234,6 +4234,23 @@ button:focus-visible,
   display: none;
 }
 
+/* Only rendered with ?mapdebug=1 — a failure we cannot reproduce has to be
+   readable off a photograph of someone else's phone. */
+.ls-station-fallback-diag {
+  margin: 14px 0 0;
+  padding: 10px;
+  border-radius: 10px;
+  background: rgba(24, 0, 50, 0.06);
+  color: var(--fw-ink);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 10px;
+  line-height: 1.5;
+  text-align: left;
+  white-space: pre-wrap;
+  word-break: break-all;
+  user-select: all;
+}
+
 /* Secondary to the directions button: the map failing is usually the connection,
    and one tap is cheaper than telling someone to reload. */
 .ls-station-fallback-retry {
