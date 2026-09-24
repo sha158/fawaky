@@ -40,6 +40,13 @@ for (const [label, w, h] of [['desktop',1440,900],['desktop',1280,900],['boundar
       mapBottom: Math.round(mapw.getBoundingClientRect().bottom),
       isEnd: aside.classList.contains('is-end'),
       overflowY: getComputedStyle(list).overflowY,
+      // the thumb must be sized from the CURRENT content height, not a stale one
+      thumb: (() => {
+        const bar = document.querySelector('.ls-stations-bar');
+        if (!bar || bar.hidden) return 'hidden';
+        const want = Math.max(36, Math.round((list.clientHeight - 20) * (list.clientHeight / list.scrollHeight)));
+        return `${parseInt(bar.firstChild.style.height, 10)}px want=${want}px`;
+      })(),
       scrollTop: list.scrollTop,
       firstRow: (rows.find(li=>!li.hidden)?.querySelector('.ls-station-name')||{}).textContent,
     };
@@ -75,7 +82,7 @@ for (const [label, w, h] of [['desktop',1440,900],['desktop',1280,900],['boundar
   const listTop = await p.evaluate(() =>
     Math.round(document.getElementById('stations-list').scrollTop));
 
-  console.log(`${label.padEnd(9)} ${String(w).padStart(4)}px  grid=${r.children} rows=${r.visible}/${r.total} toggle=${r.toggleShown} overflowY=${r.overflowY} box=${r.clientH}/${r.scrollH} bottoms ${r.listBottom}/${r.mapBottom} isEnd@top=${r.isEnd} isEnd@end=${after.isEnd} page ${before}->${after.page} scrollY ${y0}->${y1} tapLast=${tapped} listScrollTop=${listTop} first="${r.firstRow}"`);
+  console.log(`${label.padEnd(9)} ${String(w).padStart(4)}px  grid=${r.children} rows=${r.visible}/${r.total} toggle=${r.toggleShown} overflowY=${r.overflowY} thumb=${r.thumb} box=${r.clientH}/${r.scrollH} bottoms ${r.listBottom}/${r.mapBottom} isEnd@top=${r.isEnd} isEnd@end=${after.isEnd} page ${before}->${after.page} scrollY ${y0}->${y1} tapLast=${tapped} listScrollTop=${listTop} first="${r.firstRow}"`);
   await ctx.close();
 }
 await b.close();

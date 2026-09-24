@@ -356,6 +356,7 @@ function renderList(listEl, onSelect) {
       if (!el) return;
       el.textContent = text;
       el.hidden = !text;
+      markEnd(); // the extra line makes the row taller, so the thumb must resize
     },
     /* Bring a row into the list's own box. Scrolls the list and nothing else —
        scrollIntoView walks every ancestor scrollport, which would drag the whole
