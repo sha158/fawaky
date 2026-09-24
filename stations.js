@@ -237,9 +237,11 @@ function makeYouAreHere(map, lat, lng) {
 
 /* ─── List ─────────────────────────────────────────────── */
 
-// Nearest few; the rest sit behind the expander. Desktop has the vertical room
-// beside a 520px map, so it shows more and fewer visitors need the toggle at all.
-const visibleRows = () => (window.matchMedia('(min-width: 1025px)').matches ? 6 : 4);
+// Desktop shows every outlet and scrolls the list inside its own box, so the page
+// height stays the same however many outlets we add. Touch keeps the expander —
+// a scroller nested in a page scroll is worse than a tap, and the map leads there.
+const DESKTOP = '(min-width: 1025px)';
+const visibleRows = () => (window.matchMedia(DESKTOP).matches ? Infinity : 4);
 
 /* Builds every row once and reorders by moving nodes, so listeners and the distance
    text survive a re-sort. Returns handles the map side uses to talk back to it. */
@@ -298,9 +300,38 @@ function renderList(listEl, onSelect) {
     toggle.hidden = STATIONS.length <= visibleRows();
   };
 
-  toggle.addEventListener('click', () => { expanded = !expanded; applyVisibility(); });
-  window.matchMedia('(min-width: 1025px)').addEventListener('change', applyVisibility);
+  /* Our own scrollbar. macOS shows the native one only while scrolling, so nothing
+     would tell a first-time reader the list scrolls; this one is always there. */
+  const bar = document.createElement('div');
+  bar.className = 'ls-stations-bar';
+  bar.setAttribute('aria-hidden', 'true');
+  const thumb = document.createElement('div');
+  thumb.className = 'ls-stations-thumb';
+  bar.appendChild(thumb);
+  aside.appendChild(bar);
+
+  const TRACK_INSET = 20; // matches .ls-stations-bar's top + bottom offsets
+
+  // Plus a fade at the foot of the list, as a second "more below" cue.
+  const markEnd = () => {
+    const scrollable = listEl.scrollHeight - listEl.clientHeight > 1;
+    aside.classList.toggle('is-end', !scrollable
+      || listEl.scrollTop + listEl.clientHeight >= listEl.scrollHeight - 2);
+    bar.hidden = !scrollable;
+    if (!scrollable) return;
+    const track = listEl.clientHeight - TRACK_INSET;
+    const height = Math.max(36, Math.round(track * (listEl.clientHeight / listEl.scrollHeight)));
+    const travel = listEl.scrollTop / (listEl.scrollHeight - listEl.clientHeight);
+    thumb.style.height = `${height}px`;
+    thumb.style.transform = `translateY(${Math.round((track - height) * travel)}px)`;
+  };
+  listEl.addEventListener('scroll', markEnd, { passive: true });
+  window.addEventListener('resize', markEnd, { passive: true });
+
+  toggle.addEventListener('click', () => { expanded = !expanded; applyVisibility(); markEnd(); });
+  window.matchMedia(DESKTOP).addEventListener('change', () => { applyVisibility(); markEnd(); });
   applyVisibility();
+  markEnd();
 
   return {
     rows,
@@ -316,6 +347,8 @@ function renderList(listEl, onSelect) {
       items.clear();
       reordered.forEach((li, id) => items.set(id, li));
       applyVisibility();
+      listEl.scrollTop = 0; // the nearest outlet just moved to the top — show it
+      markEnd();
     },
     setDistance(stationId, text) {
       const btn = rows.get(stationId);
@@ -324,13 +357,20 @@ function renderList(listEl, onSelect) {
       el.textContent = text;
       el.hidden = !text;
     },
+    /* Bring a row into the list's own box. Scrolls the list and nothing else —
+       scrollIntoView walks every ancestor scrollport, which would drag the whole
+       section under the reader. Below 1025px the list is not a scroller and keeps
+       its expander, so this is a no-op there and the page never moves on a tap. */
     reveal(stationId) {
-      if (items.has(stationId) && items.get(stationId).hidden) {
-        expanded = true;
-        applyVisibility();
-      }
       const li = items.get(stationId);
-      if (li) li.scrollIntoView({ block: 'nearest', behavior: reducedMotion ? 'auto' : 'smooth' });
+      if (!li || listEl.scrollHeight <= listEl.clientHeight) return;
+      const top = li.offsetTop;
+      const bottom = top + li.offsetHeight;
+      if (top >= listEl.scrollTop && bottom <= listEl.scrollTop + listEl.clientHeight) return;
+      listEl.scrollTo({
+        top: Math.max(0, top - (listEl.clientHeight - li.offsetHeight) / 2),
+        behavior: reducedMotion ? 'auto' : 'smooth',
+      });
     },
   };
 }
@@ -475,6 +515,9 @@ function initMap(mapEl, stage, wrap, list) {
 
   const setActive = (id) => {
     list.rows.forEach((btn, key) => btn.classList.toggle('is-active', key === id));
+    // The desktop list is a 520px scroller over every outlet, so the row that just
+    // became active can sit outside the box. Bring it in if it does.
+    if (id) list.reveal(id);
   };
 
   /* Centre a point in the strip above the bottom sheet rather than behind it, by

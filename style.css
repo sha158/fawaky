@@ -4024,6 +4024,9 @@ button:focus-visible,
 }
 
 /* ─── Outlet list ─── */
+/* Desktop: a fixed box the outlets scroll inside. The section's height then no
+   longer depends on how many outlets exist — adding the next ten changes nothing
+   on the page. Height matches the map so the two columns end on the same line. */
 .ls-stations-list {
   list-style: none;
   margin: 0;
@@ -4031,7 +4034,20 @@ button:focus-visible,
   border-radius: 18px;
   background: var(--fw-card-bg);
   border: 1px solid var(--fw-card-bd);
-  overflow: hidden;
+  position: relative; /* offsetParent for reveal()'s scroll maths */
+  max-height: 522px; /* the map's 520px canvas plus its 1px border, so bottoms line up */
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain; /* reaching the end must not scroll the page */
+  /* The native bar is hidden and drawn by .ls-stations-bar instead: macOS shows
+     overlay scrollbars only while scrolling, so nothing would tell a first-time
+     reader the list scrolls at all. */
+  scrollbar-width: none;
+}
+
+.ls-stations-list::-webkit-scrollbar {
+  width: 0;
+  height: 0;
 }
 
 .ls-station-row + .ls-station-row {
@@ -4219,6 +4235,12 @@ button:focus-visible,
   .ls-stations-grid {
     grid-template-columns: 1fr;
     gap: 20px;
+  }
+  /* Touch keeps the "Show all" expander, so the list is short and grows the page
+     only when asked — no scroller nested inside the page scroll. */
+  .ls-stations-list {
+    max-height: none;
+    overflow: hidden;
   }
   .ls-stations-map-wrap {
     order: -1; /* map leads on narrow screens, as in the mockups */
@@ -4660,4 +4682,59 @@ body.is-map-expanded {
   display: flex;
   flex-direction: column;
   min-width: 0;
+  position: relative;
+}
+
+/* Says "more below" without waiting for macOS to reveal its overlay scrollbar. */
+.ls-stations-aside::after {
+  content: '';
+  position: absolute;
+  inset: auto 1px 1px 1px;
+  height: 56px;
+  border-radius: 0 0 17px 17px;
+  pointer-events: none;
+  /* #2B0A36 = --fw-card-bg (white 4%) composited over --ls-bg, so the fade
+     lands exactly on the list's own surface with no seam at the bottom edge. */
+  background: linear-gradient(to bottom, rgba(43, 10, 54, 0), #2B0A36);
+  transition: opacity 0.25s var(--ease);
+}
+
+.ls-stations-aside.is-end::after {
+  opacity: 0;
+}
+
+/* Always-visible slim scrollbar, drawn by renderList() from scrollTop. */
+.ls-stations-bar {
+  position: absolute;
+  top: 10px;
+  right: 7px;
+  width: 4px;
+  height: calc(100% - 20px);
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.08);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.ls-stations-bar[hidden] {
+  display: none;
+}
+
+.ls-stations-thumb {
+  width: 100%;
+  border-radius: 9999px;
+  background: rgba(146, 184, 61, 0.62);
+  transition: transform 0.08s linear;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ls-stations-thumb { transition: none; }
+}
+
+/* No inner scroller below 1025px, so no fade. Declared after the base rule —
+   same specificity, so source order decides. */
+@media (max-width: 1024px) {
+  .ls-stations-aside::after {
+    display: none;
+  }
 }
