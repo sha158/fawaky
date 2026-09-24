@@ -41,9 +41,30 @@ export const STATIONS = [
   // Kankanady
   { id: 'story-bakes', name: 'Story Bakes', area: 'Old Kankanady Rd', lat: 12.8689119, lng: 74.8625082 },
   { id: 'swagath-sweets', name: 'Swagath Sweets', area: 'Kankanady', lat: 12.8681072, lng: 74.8579581 },
+  { id: 'fresh-bakery', name: 'Fresh Bakery', area: 'Kankanady', lat: 12.8696719, lng: 74.8582358 },
+  { id: 'indian-foods-salafi', name: 'Indian Foods', area: 'Salafi Center, Kankanady', lat: 12.8683076, lng: 74.8569523 },
+
+  // Bendoorwell
+  { id: 'attil-restaurant', name: 'Attil Restaurant', area: 'Bendoorwell', lat: 12.8705436, lng: 74.8570234 },
+
+  // Valencia
+  { id: 'spectrum-gaming', name: 'Spectrum Gaming Snooker & Playstation', area: 'Valencia', lat: 12.8639653, lng: 74.8577798 },
+  { id: 'big-mishra-pedha', name: 'Big Mishra Pedha', area: 'Valencia', lat: 12.8635701, lng: 74.8572718 },
 
   // Nandigudda
   { id: 'royal-tea', name: 'Royal Tea', area: 'Nandigudda, Mangaluru', lat: 12.855757, lng: 74.8537288 },
+
+  // Marnamikatte
+  { id: 'misbah-super-market', name: 'Misbah Super Market', area: 'Marnamikatte', lat: 12.8520042, lng: 74.8496309 },
+  { id: 'garam-chai', name: 'Garam Chai', area: 'Marnamikatte', lat: 12.8508454, lng: 74.8525374 },
+
+  // Morgans Gate
+  // A second Swagath Sweets, 2.3 km from the Kankanady one — a branch, not a repeat.
+  // The area line under the name is what tells the two rows apart.
+  { id: 'swagath-sweets-morgans-gate', name: 'Swagath Sweets', area: 'Morgans Gate', lat: 12.8477054, lng: 74.8526024 },
+
+  // Bolar
+  { id: 'ah-bakery-bolar', name: 'A.H Bakery', area: 'Bolar', lat: 12.8470241, lng: 74.8448006 },
 ];
 
 /* Centroid of the outlets — the view before location is known or anything selected. */

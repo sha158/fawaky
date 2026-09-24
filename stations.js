@@ -842,33 +842,63 @@ function initMap(mapEl, stage, wrap, list) {
     leaderLines = [];
   };
 
+  /* Fanning fixes collisions inside a group but knows nothing about the group next
+     door, and along a corridor as dense as this one two fans end up on top of each
+     other — at 30 outlets the closest drawn pair sat 12px apart with 36px pins. So
+     the fan is only the opening layout; this pass then pushes any two pins still
+     overlapping apart until none do. A few passes, not a running simulation: the
+     layout has to come out the same on every idle or the pins would crawl on pan. */
+  const RELAX_PASSES = 8;
+  const MAX_DISPLACEMENT = 90; // px a pin may end up from its true point
+
+  const relax = (nodes, minDist) => {
+    for (let pass = 0; pass < RELAX_PASSES; pass += 1) {
+      let moved = false;
+      for (let i = 0; i < nodes.length; i += 1) {
+        for (let j = i + 1; j < nodes.length; j += 1) {
+          const a = nodes[i];
+          const b = nodes[j];
+          if (a.fixed && b.fixed) continue;
+          let dx = b.x - a.x;
+          let dy = b.y - a.y;
+          let d = Math.hypot(dx, dy);
+          if (d >= minDist) continue;
+          if (d < 0.01) { dx = Math.cos(i); dy = Math.sin(i); d = 1; } // exactly coincident
+          const push = (minDist - d) / 2;
+          const ux = (dx / d) * push;
+          const uy = (dy / d) * push;
+          // The routed destination cannot move, so it hands its whole share of the
+          // push to the other pin rather than staying overlapped.
+          if (a.fixed) { b.x += ux * 2; b.y += uy * 2; }
+          else if (b.fixed) { a.x -= ux * 2; a.y -= uy * 2; }
+          else { a.x -= ux; a.y -= uy; b.x += ux; b.y += uy; }
+          moved = true;
+        }
+      }
+      if (!moved) break;
+    }
+  };
+
   const renderClusters = () => {
     const projection = projector.getProjection();
     const groups = groupStations();
     if (!projection || !groups) return;
     clearLeaders();
-    const icon = pinIcon(pinWidth());
+    const w = pinWidth();
+    const icon = pinIcon(w);
     markers.forEach((m) => m.setIcon(icon));
 
-    const place = (station, position, displaced) => {
-      const marker = markers.get(station.id);
-      marker.setPosition(position);
-      marker.setMap(map);
-      if (!displaced) return;
-      leaderLines.push(new google.maps.Polyline({
-        path: [position, { lat: station.lat, lng: station.lng }],
-        map,
-        strokeColor: '#92B83D',
-        strokeOpacity: 0.85,
-        strokeWeight: 2,
-        zIndex: 1,
-      }));
-    };
+    const truePt = (station) => projection.fromLatLngToDivPixel(
+      new google.maps.LatLng(station.lat, station.lng));
 
+    // Where every pin wants to be drawn, before anyone checks whether two of them
+    // want the same place.
+    const nodes = [];
     groups.forEach((group) => {
       if (group.members.length === 1) {
         const only = group.members[0];
-        place(only, { lat: only.lat, lng: only.lng }, false);
+        const pt = truePt(only);
+        nodes.push({ station: only, x: pt.x, y: pt.y, tx: pt.x, ty: pt.y, fixed: only.id === pinnedId });
         return;
       }
 
@@ -881,25 +911,57 @@ function initMap(mapEl, stage, wrap, list) {
       let cy = group.y;
 
       if (anchor) {
-        const pt = projection.fromLatLngToDivPixel(
-          new google.maps.LatLng(anchor.lat, anchor.lng));
+        const pt = truePt(anchor);
         cx = pt.x;
         cy = pt.y;
-        place(anchor, { lat: anchor.lat, lng: anchor.lng }, false);
+        nodes.push({ station: anchor, x: pt.x, y: pt.y, tx: pt.x, ty: pt.y, fixed: true });
       }
 
-      // Smallest ring on which `n` pins of this width do not overlap, rather than a
-      // radius that grows unbounded and throws pins off the tile.
+      // Smallest ring on which `n` pins of this width clear each other, rather than
+      // a radius that grows unbounded and throws pins off the tile.
       const n = Math.max(fanned.length, 2);
-      const w = pinWidth();
-      const radius = Math.max(22, Math.min(72, (w * 0.62) / (2 * Math.sin(Math.PI / n))));
+      const radius = Math.max(w * 0.72, Math.min(72, (w * 0.62) / (2 * Math.sin(Math.PI / n))));
       fanned.forEach((station, i) => {
         const angle = FAN_START + (2 * Math.PI * i) / fanned.length;
-        place(station, projection.fromDivPixelToLatLng(new google.maps.Point(
-          cx + radius * Math.cos(angle),
-          cy + radius * Math.sin(angle),
-        )), true);
+        const pt = truePt(station);
+        nodes.push({
+          station,
+          x: cx + radius * Math.cos(angle),
+          y: cy + radius * Math.sin(angle),
+          tx: pt.x,
+          ty: pt.y,
+          fixed: false,
+        });
       });
+    });
+
+    relax(nodes, w * 0.9);
+
+    nodes.forEach((node) => {
+      let dx = node.x - node.tx;
+      let dy = node.y - node.ty;
+      const away = Math.hypot(dx, dy);
+      // However crowded it gets, a pin stays within sight of the place it stands for.
+      if (away > MAX_DISPLACEMENT) {
+        const k = MAX_DISPLACEMENT / away;
+        dx *= k;
+        dy *= k;
+      }
+      const marker = markers.get(node.station.id);
+      const position = away < 1
+        ? { lat: node.station.lat, lng: node.station.lng }
+        : projection.fromDivPixelToLatLng(new google.maps.Point(node.tx + dx, node.ty + dy));
+      marker.setPosition(position);
+      marker.setMap(map);
+      if (away < 1) return;
+      leaderLines.push(new google.maps.Polyline({
+        path: [position, { lat: node.station.lat, lng: node.station.lng }],
+        map,
+        strokeColor: '#92B83D',
+        strokeOpacity: 0.85,
+        strokeWeight: 2,
+        zIndex: 1,
+      }));
     });
   };
 
