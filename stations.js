@@ -237,11 +237,9 @@ function makeYouAreHere(map, lat, lng) {
 
 /* ─── List ─────────────────────────────────────────────── */
 
-// Desktop shows every outlet and scrolls the list inside its own box, so the page
-// height stays the same however many outlets we add. Touch keeps the expander —
-// a scroller nested in a page scroll is worse than a tap, and the map leads there.
-const DESKTOP = '(min-width: 1025px)';
-const visibleRows = () => (window.matchMedia(DESKTOP).matches ? Infinity : 4);
+// Every outlet is listed at every width, inside a box the list scrolls within, so
+// the page's height stays the same however many outlets we add. The expander that
+// used to hide the tail is gone with it.
 
 /* Builds every row once and reorders by moving nodes, so listeners and the distance
    text survive a re-sort. Returns handles the map side uses to talk back to it. */
@@ -249,7 +247,6 @@ function renderList(listEl, onSelect) {
   listEl.innerHTML = '';
   const rows = new Map();
   const items = new Map(); // station.id -> <li>
-  let expanded = false;
 
   STATIONS.forEach((station) => {
     const li = document.createElement('li');
@@ -277,28 +274,13 @@ function renderList(listEl, onSelect) {
     items.set(station.id, li);
   });
 
-  const toggle = document.createElement('button');
-  toggle.type = 'button';
-  toggle.className = 'ls-stations-more';
-
-  // The list and its toggle must be ONE grid child. Appending the button as a
-  // sibling made it a third item, so auto-placement handed it the map's column and
-  // pushed the map onto a second row at 320px wide.
+  // The list and everything drawn against it must be ONE grid child. The button
+  // that used to live here was appended as a sibling, which made it a third item:
+  // auto-placement handed it the map's column and pushed the map onto a second row.
   const aside = document.createElement('div');
   aside.className = 'ls-stations-aside';
   listEl.replaceWith(aside);
-  aside.append(listEl, toggle);
-
-  const applyVisibility = () => {
-    let i = 0;
-    items.forEach((li) => {
-      li.hidden = !expanded && i >= visibleRows();
-      i += 1;
-    });
-    toggle.textContent = expanded ? 'Show fewer' : `Show all ${STATIONS.length}`;
-    toggle.setAttribute('aria-expanded', String(expanded));
-    toggle.hidden = STATIONS.length <= visibleRows();
-  };
+  aside.append(listEl);
 
   /* Our own scrollbar. macOS shows the native one only while scrolling, so nothing
      would tell a first-time reader the list scrolls; this one is always there. */
@@ -327,10 +309,6 @@ function renderList(listEl, onSelect) {
   };
   listEl.addEventListener('scroll', markEnd, { passive: true });
   window.addEventListener('resize', markEnd, { passive: true });
-
-  toggle.addEventListener('click', () => { expanded = !expanded; applyVisibility(); markEnd(); });
-  window.matchMedia(DESKTOP).addEventListener('change', () => { applyVisibility(); markEnd(); });
-  applyVisibility();
   markEnd();
 
   return {
@@ -346,7 +324,6 @@ function renderList(listEl, onSelect) {
       order.forEach(({ station }) => reordered.set(station.id, items.get(station.id)));
       items.clear();
       reordered.forEach((li, id) => items.set(id, li));
-      applyVisibility();
       listEl.scrollTop = 0; // the nearest outlet just moved to the top — show it
       markEnd();
     },
@@ -360,8 +337,7 @@ function renderList(listEl, onSelect) {
     },
     /* Bring a row into the list's own box. Scrolls the list and nothing else —
        scrollIntoView walks every ancestor scrollport, which would drag the whole
-       section under the reader. Below 1025px the list is not a scroller and keeps
-       its expander, so this is a no-op there and the page never moves on a tap. */
+       section under the reader, and on touch would fight the page scroll. */
     reveal(stationId) {
       const li = items.get(stationId);
       if (!li || listEl.scrollHeight <= listEl.clientHeight) return;

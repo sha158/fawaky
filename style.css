@@ -4024,9 +4024,9 @@ button:focus-visible,
 }
 
 /* ─── Outlet list ─── */
-/* Desktop: a fixed box the outlets scroll inside. The section's height then no
-   longer depends on how many outlets exist — adding the next ten changes nothing
-   on the page. Height matches the map so the two columns end on the same line. */
+/* A fixed box the outlets scroll inside, at every width. The section's height then
+   no longer depends on how many outlets exist — adding the next ten changes nothing
+   on the page. Each breakpoint's height matches that breakpoint's map. */
 .ls-stations-list {
   list-style: none;
   margin: 0;
@@ -4236,11 +4236,8 @@ button:focus-visible,
     grid-template-columns: 1fr;
     gap: 20px;
   }
-  /* Touch keeps the "Show all" expander, so the list is short and grows the page
-     only when asked — no scroller nested inside the page scroll. */
   .ls-stations-list {
-    max-height: none;
-    overflow: hidden;
+    max-height: 422px; /* the tablet map's 420px plus its 1px border */
   }
   .ls-stations-map-wrap {
     order: -1; /* map leads on narrow screens, as in the mockups */
@@ -4259,6 +4256,9 @@ button:focus-visible,
   }
   .ls-stations-map {
     height: 380px;
+  }
+  .ls-stations-list {
+    max-height: 382px;
   }
 
   /* The card becomes a bottom sheet inside the map, as in the hero mockup. */
@@ -4297,6 +4297,11 @@ button:focus-visible,
   .ls-stations-map {
     min-height: 260px;
     height: 260px;
+  }
+  /* Taller than the map here: the map only has to be recognisable, the list is
+     what people read, and the page still has room above and below it to grab. */
+  .ls-stations-list {
+    max-height: 322px;
   }
   .ls-station-card-name {
     font-size: var(--fs-3xl);
@@ -4556,38 +4561,6 @@ body.is-map-expanded {
   }
 }
 
-/* "Show all N" toggle under the station list. */
-.ls-stations-more {
-  display: block;
-  width: 100%;
-  margin-top: 10px;
-  padding: 12px;
-  border: 1px solid var(--fw-card-bd);
-  border-radius: 12px;
-  background: transparent;
-  color: var(--fw-green);
-  font-family: var(--font-body);
-  font-size: var(--fs-sm);
-  font-weight: 700;
-  letter-spacing: var(--ls-label);
-  cursor: pointer;
-  transition: background 0.3s var(--ease), border-color 0.3s var(--ease);
-}
-
-.ls-stations-more:hover,
-.ls-stations-more:focus-visible {
-  background: rgba(146, 184, 61, 0.1);
-  border-color: var(--fw-green);
-}
-
-.ls-stations-more[hidden] {
-  display: none;
-}
-
-.ls-station-row[hidden] {
-  display: none;
-}
-
 /* Flashed when a cluster of coincident outlets is tapped — zooming can never
    separate them, so the list is what tells them apart. */
 .ls-station-btn.is-flagged {
@@ -4731,10 +4704,3 @@ body.is-map-expanded {
   .ls-stations-thumb { transition: none; }
 }
 
-/* No inner scroller below 1025px, so no fade. Declared after the base rule —
-   same specificity, so source order decides. */
-@media (max-width: 1024px) {
-  .ls-stations-aside::after {
-    display: none;
-  }
-}

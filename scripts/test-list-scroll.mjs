@@ -1,9 +1,9 @@
 /* The outlet list scrolls inside its own box on desktop, so the section's height no
    longer grows with the number of outlets. Asserts, per width: the grid still has two
-   children, desktop shows every row with no expander and a real scroller, the list and
-   the map end on the same line, the page height does not change when the list is
-   scrolled, the foot fade clears at the end, and tapping a pin scrolls the LIST, never
-   the page. Below 1025px nothing may change: 4 rows and the expander, as before.
+   children, every row is listed with no expander inside a real scroller, the page
+   height does not change when the list is scrolled, the thumb is sized from the
+   current content, the foot fade clears at the end, and tapping a pin scrolls the
+   LIST, never the page. On desktop the list and the map must end on the same line.
    Needs the dev server on :5173; stubs the Maps SDK from test-route-stub.mjs. */
 import { chromium } from 'playwright';
 import { readFileSync } from 'node:fs';

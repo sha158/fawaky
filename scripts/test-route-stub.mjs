@@ -121,7 +121,8 @@ async function run(label, { grant, forceStatus }) {
     rowsTotal: document.querySelectorAll('.ls-station-row').length,
     rowsVisible: Array.from(document.querySelectorAll('.ls-station-row')).filter(r => !r.hidden).length,
     firstRow: (document.querySelector('.ls-station-row:not([hidden]) .ls-station-name') || {}).textContent || '',
-    toggle: (document.querySelector('.ls-stations-more') || {}).textContent || '',
+    scroller: (() => { const l = document.getElementById('stations-list');
+      return `${l.clientHeight}/${l.scrollHeight}`; })(),
     hintVisible: (() => { const h = document.getElementById('stations-hint');
       return h ? getComputedStyle(h).opacity === '1' : false; })(),
   }));
@@ -159,6 +160,6 @@ await run('req-denied', { grant: true, forceStatus: 'PERMISSION_DENIED: Routes A
 await browser.close();
 for (const r of out) {
   const c = r.collapsed;
-  console.log(`${r.label.padEnd(11)} COLLAPSED lines=${c.lines} dot=${c.dot} rows=${c.rowsVisible}/${c.rowsTotal} first="${c.firstRow}" bubbles=[${c.cluster.bubbles}] pins=${c.cluster.pins} toggle="${c.toggle}" card=${c.cardOpen} hint=${c.hintVisible}`);
+  console.log(`${r.label.padEnd(11)} COLLAPSED lines=${c.lines} dot=${c.dot} rows=${c.rowsVisible}/${c.rowsTotal} first="${c.firstRow}" bubbles=[${c.cluster.bubbles}] pins=${c.cluster.pins} box=${c.scroller} card=${c.cardOpen} hint=${c.hintVisible}`);
   console.log(`${''.padEnd(11)} EXPANDED  lines=${r.lines} calls=${r.calls}->${r.callsAfterSecond} card=${r.cardOpen} afterCollapse=${r.afterCollapse} errors=${r.loud}`);
 }
