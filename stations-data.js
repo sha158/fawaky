@@ -56,8 +56,12 @@ export const FOCUS_ZOOM = 16;
 
 /* Universal cross-platform Maps URL: opens the native app on iOS/Android,
    the web map on desktop. */
-export function directionsUrl(station) {
-  return `https://www.google.com/maps/dir/?api=1&destination=${station.lat},${station.lng}`;
+/* With an origin, Google Maps opens with the route already drawn instead of an
+   empty search field — the visitor sees the line, not a form. Without one it still
+   works; Maps then uses whatever location that app has. */
+export function directionsUrl(station, from) {
+  const url = `https://www.google.com/maps/dir/?api=1&destination=${station.lat},${station.lng}`;
+  return from ? `${url}&origin=${from.lat},${from.lng}&travelmode=driving` : url;
 }
 
 /* Great-circle distance in km. Good enough for picking a nearest outlet and for

@@ -39,17 +39,30 @@ const MAP_STYLE = [
 
 let loaderPromise = null;
 
+// A stalled request never fires onerror, so on a weak connection the tile would sit
+// empty for ever. Give up at this point and let the caller try again.
+const LOAD_TIMEOUT_MS = 15000;
+
 function loadMapsApi() {
   if (window.google && window.google.maps) return Promise.resolve();
   if (loaderPromise) return loaderPromise;
 
   loaderPromise = new Promise((resolve, reject) => {
     const cb = '__fawakyMapsReady';
-    window[cb] = () => { delete window[cb]; resolve(); };
     const s = document.createElement('script');
+    let timer = null;
+    const fail = (msg) => {
+      clearTimeout(timer);
+      delete window[cb];
+      s.remove();
+      loaderPromise = null; // a retry must be able to start a fresh request
+      reject(new Error(msg));
+    };
+    window[cb] = () => { clearTimeout(timer); delete window[cb]; resolve(); };
     s.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(API_KEY)}&callback=${cb}&loading=async&v=weekly`;
     s.async = true;
-    s.onerror = () => reject(new Error('Google Maps failed to load'));
+    s.onerror = () => fail('Google Maps failed to load');
+    timer = setTimeout(() => fail('Google Maps timed out'), LOAD_TIMEOUT_MS);
     document.head.appendChild(s);
   });
   return loaderPromise;
@@ -58,6 +71,9 @@ function loadMapsApi() {
 /* ─── Visitor location ─────────────────────────────────── */
 
 let positionPromise = null;
+// The last position we actually got. Read it where awaiting would be wrong — the
+// directions links, which have to carry a URL the moment they are rendered.
+let lastOrigin = null;
 
 function askBrowserForPosition() {
   return new Promise((resolve) => {
@@ -101,6 +117,7 @@ function getPosition() {
 
   positionPromise = attempt.then((pos) => {
     if (!pos) positionPromise = null; // keep it retryable
+    else lastOrigin = pos;
     return pos;
   });
 
@@ -113,7 +130,7 @@ async function requestPositionFromClick() {
   if (!navigator.geolocation) return { pos: null, blocked: false };
   if (await locationBlocked()) return { pos: null, blocked: true };
   const pos = await askBrowserForPosition();
-  if (pos) positionPromise = Promise.resolve(pos);
+  if (pos) { positionPromise = Promise.resolve(pos); lastOrigin = pos; }
   return { pos, blocked: !pos && await locationBlocked() };
 }
 
@@ -352,6 +369,19 @@ function renderList(listEl, onSelect) {
   };
 }
 
+/* Straight-line distances are free, so every row gets one and the list reorders
+   nearest-first. Used with a map and without one. */
+const kmLabel = (km) => (km < 1 ? `${Math.round(km * 1000)} m` : `${km.toFixed(1)} km`);
+
+function rankList(list, origin) {
+  const ranked = stationsByDistance(origin);
+  list.sortBy(ranked);
+  ranked.forEach(({ station, km }) => {
+    if (km != null) list.setDistance(station.id, `${kmLabel(km)} away`);
+  });
+  return ranked;
+}
+
 /* ─── Selected-station card ────────────────────────────── */
 
 function buildCard(stage) {
@@ -376,7 +406,7 @@ function buildCard(stage) {
     show(station, route) {
       card.querySelector('.ls-station-card-name').textContent = station.name;
       card.querySelector('.ls-station-card-area').textContent = station.area;
-      card.querySelector('.ls-station-card-cta').href = directionsUrl(station);
+      card.querySelector('.ls-station-card-cta').href = directionsUrl(station, lastOrigin);
 
       // Stays hidden unless a route actually resolved, so the card never shows
       // an empty row.
@@ -396,18 +426,38 @@ function buildCard(stage) {
 
 /* ─── Fallback — no key, or the script never arrived ───── */
 
-function renderFallback(wrap) {
+function renderFallback(wrap, list) {
   wrap.classList.add('is-fallback');
   // Deliberately NOT a card per station: at 21 outlets that built a ~3,800px tower.
-  // The list beside the map already carries every outlet, and with no map to select
-  // on, its rows open directions directly — so this only has to explain itself.
-  const nearest = STATIONS[0];
+  // The list beside the map already carries every outlet, so this panel only has to
+  // name the nearest one and hand the route to the Maps app.
   wrap.innerHTML = `
     <div class="ls-station-fallback">
       <h3 class="ls-station-card-name">Map unavailable</h3>
-      <p class="ls-station-card-area">Pick an outlet from the list for directions.</p>
-      ${nearest ? `<a class="ls-station-card-cta" href="${directionsUrl(nearest)}" target="_blank" rel="noopener">Directions to ${nearest.name}</a>` : ''}
+      <p class="ls-station-card-area" id="stations-fallback-note">Finding your nearest outlet…</p>
+      <a class="ls-station-card-cta" target="_blank" rel="noopener" hidden></a>
+      <button type="button" class="ls-station-fallback-retry">Try again</button>
     </div>`;
+
+  const note = wrap.querySelector('#stations-fallback-note');
+  const cta = wrap.querySelector('.ls-station-card-cta');
+  wrap.querySelector('.ls-station-fallback-retry')
+    .addEventListener('click', () => window.location.reload());
+
+  // No map to draw a line on, so the nearest outlet is chosen here and Google Maps
+  // is handed both ends — it opens with the route already drawn.
+  getPosition().then((origin) => {
+    if (!origin) {
+      note.textContent = 'Tap an outlet in the list to get directions.';
+      return;
+    }
+    const nearest = (list ? rankList(list, origin) : stationsByDistance(origin))[0];
+    if (!nearest) return;
+    note.textContent = `Nearest: ${nearest.station.name} · ${kmLabel(nearest.km)} away`;
+    cta.textContent = 'Get directions';
+    cta.href = directionsUrl(nearest.station, origin);
+    cta.hidden = false;
+  });
 }
 
 /* ─── Expand to full screen ────────────────────────────── */
@@ -647,14 +697,8 @@ function initMap(mapEl, stage, wrap, list) {
     // to see where they are relative to the station.
     if (!youAreHere) youAreHere = makeYouAreHere(map, origin.lat, origin.lng);
 
-    // Straight-line distances are free, so every row gets one and the list reorders
-    // nearest-first. Only the nearest station gets a billed road route.
-    const ranked = stationsByDistance(origin);
-    list.sortBy(ranked);
-    const asLine = (km) => (km < 1 ? `${Math.round(km * 1000)} m` : `${km.toFixed(1)} km`);
-    ranked.forEach(({ station: st, km }) => {
-      if (km != null) list.setDistance(st.id, `${asLine(km)} away`);
-    });
+    // Only the nearest station gets a billed road route.
+    const ranked = rankList(list, origin);
     const nearestKm = ranked.length ? ranked[0].km : null;
 
     const station = nearestStation(origin);
@@ -667,7 +711,7 @@ function initMap(mapEl, stage, wrap, list) {
     renderClusters();
     drawRoute(route);
     setRowDistance(station.id, nearestKm != null
-      ? `${asLine(nearestKm)} away · ${route.duration} drive`
+      ? `${kmLabel(nearestKm)} away · ${route.duration} drive`
       : `${route.distance} · ${route.duration}`);
     setActive(station.id);
 
@@ -850,12 +894,12 @@ export default function initStations() {
   let select = null;
   const list = renderList(listEl, (station) => {
     if (select) select(station);
-    else window.open(directionsUrl(station), '_blank', 'noopener');
+    else window.open(directionsUrl(station, lastOrigin), '_blank', 'noopener');
   });
 
   if (!API_KEY) {
     console.warn('[fawaky] VITE_GOOGLE_MAPS_API_KEY is empty — showing the static fallback.');
-    renderFallback(wrap);
+    renderFallback(wrap, list);
     return;
   }
 
@@ -867,20 +911,29 @@ export default function initStations() {
      fine and then paints its own grey "Oops!" panel over the map. This is the only
      hook it gives us, and it has to exist before the script runs. */
   window.gm_authFailure = () => {
-    console.warn('[fawaky] Google Maps rejected the API key (referrer, billing, or API restriction). Showing the static fallback.');
-    renderFallback(wrap);
+    console.warn('[fawaky] Google Maps rejected the API key (referrer, billing, quota or API restriction). Showing the static fallback.');
+    renderFallback(wrap, list);
   };
 
   let started = false;
   const start = () => {
     if (started) return;
     started = true;
-    loadMapsApi()
+    // A dropped or stalled request on a weak mobile connection is the likeliest
+    // failure here and it usually clears, so try again before giving the tile up.
+    const RETRY_MS = [2000, 6000];
+    const attempt = (n) => loadMapsApi()
       .then(() => { select = initMap(mapEl, stage, wrap, list); })
       .catch((err) => {
+        if (n < RETRY_MS.length) {
+          console.warn(`[fawaky] stations map: ${err.message} — retrying`);
+          setTimeout(() => attempt(n + 1), RETRY_MS[n]);
+          return;
+        }
         console.warn('[fawaky] stations map unavailable:', err.message);
-        renderFallback(wrap);
+        renderFallback(wrap, list);
       });
+    attempt(0);
   };
 
   const obs = new IntersectionObserver((entries) => {

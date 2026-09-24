@@ -4230,6 +4230,28 @@ button:focus-visible,
   color: var(--fw-ink);
 }
 
+.ls-station-fallback .ls-station-card-cta[hidden] {
+  display: none;
+}
+
+/* Secondary to the directions button: the map failing is usually the connection,
+   and one tap is cheaper than telling someone to reload. */
+.ls-station-fallback-retry {
+  display: block;
+  width: 100%;
+  margin-top: 10px;
+  padding: 10px;
+  border: 0;
+  background: none;
+  color: var(--ls-primary);
+  font-family: var(--font-body);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
 /* ─── Tablet ─── */
 @media (max-width: 1024px) {
   .ls-stations-grid {
