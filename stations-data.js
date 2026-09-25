@@ -54,6 +54,12 @@ export const STATIONS = [
   // Nandigudda
   { id: 'royal-tea', name: 'Royal Tea', area: 'Nandigudda, Mangaluru', lat: 12.855757, lng: 74.8537288 },
 
+  // Kodagu — 106 km east of the corridor, and the reason the tile frames the
+  // visitor's own neighbourhood rather than every outlet at once.
+  // PLACEHOLDER NAME: the client sent the coordinates without one. Replace
+  // 'Fawaky Outlet' with the shop's real name when it arrives.
+  { id: 'fawaky-hodavada', name: 'Fawaky Outlet', area: 'Hodavada, Kodagu', lat: 12.311460, lng: 75.697823 },
+
   // Marnamikatte
   { id: 'misbah-super-market', name: 'Misbah Super Market', area: 'Marnamikatte', lat: 12.8520042, lng: 74.8496309 },
   { id: 'garam-chai', name: 'Garam Chai', area: 'Marnamikatte', lat: 12.8508454, lng: 74.8525374 },
@@ -67,11 +73,11 @@ export const STATIONS = [
   { id: 'ah-bakery-bolar', name: 'A.H Bakery', area: 'Bolar', lat: 12.8470241, lng: 74.8448006 },
 ];
 
-/* Centroid of the outlets — the view before location is known or anything selected. */
-export const MAP_CENTER = {
-  lat: STATIONS.reduce((s, x) => s + x.lat, 0) / STATIONS.length,
-  lng: STATIONS.reduce((s, x) => s + x.lng, 0) / STATIONS.length,
-};
+/* The view before location is known or anything selected: the centre of the
+   Mangaluru corridor, where all but one outlet is. Deliberately a constant and not
+   the mean of the array — the outlet 106 km away would drag the default view by
+   3.5 km, and the next distant one would drag it further. */
+export const MAP_CENTER = { lat: 12.865592, lng: 74.872609 };
 export const MAP_ZOOM = 13;
 export const FOCUS_ZOOM = 16;
 

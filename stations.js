@@ -622,9 +622,23 @@ function initMap(mapEl, stage, wrap, list) {
 
   /* Three states to frame, not two: a drawn route wins over everything, because
      a route the viewer cannot see is the same as no route at all. */
-  const allStationBounds = () => {
+
+  /* The tile frames where the visitor IS, not every outlet there is. Framing the
+     whole network stopped working the moment one outlet landed 106 km from the rest:
+     the corridor's 30 pins collapsed into a few pixels and the de-overlap pass fanned
+     them into a blob. A distance cap as well as a count, so somebody standing in
+     Kodagu gets the one outlet near them rather than a map of Mangaluru. */
+  const NEARBY_KM = 10; // the corridor is ~7 km end to end
+  const NEARBY_MAX = 8; // and no more pins than a tile can show at once
+
+  const neighbourhoodBounds = () => {
     const b = new google.maps.LatLngBounds();
-    STATIONS.forEach((st) => b.extend({ lat: st.lat, lng: st.lng }));
+    const ranked = stationsByDistance(lastOrigin);
+    const near = lastOrigin
+      ? ranked.filter((r) => r.km <= NEARBY_KM).slice(0, NEARBY_MAX)
+      : ranked;
+    (near.length ? near : ranked.slice(0, 1))
+      .forEach(({ station }) => b.extend({ lat: station.lat, lng: station.lng }));
     return b;
   };
 
@@ -638,7 +652,7 @@ function initMap(mapEl, stage, wrap, list) {
         map.fitBounds(currentRoute.bounds, PAD[m]);
         return;
       }
-      const both = allStationBounds();
+      const both = neighbourhoodBounds();
       both.union(currentRoute.bounds);
       map.fitBounds(both, PAD[m]);
       return;
@@ -891,12 +905,24 @@ function initMap(mapEl, stage, wrap, list) {
     const truePt = (station) => projection.fromLatLngToDivPixel(
       new google.maps.LatLng(station.lat, station.lng));
 
+    /* Now the tile frames a neighbourhood rather than the whole network, most
+       outlets are off screen on any given view. Clamping those into the viewport
+       would line the edges with pins on long leader lines pointing at nothing, so a
+       pin whose TRUE point is outside the tile is taken off the map instead. */
+    const viewport = map.getBounds && map.getBounds();
+    const onScreen = (station) => !viewport
+      || viewport.contains(new google.maps.LatLng(station.lat, station.lng));
+
     // Where every pin wants to be drawn, before anyone checks whether two of them
     // want the same place.
     const nodes = [];
     groups.forEach((group) => {
       if (group.members.length === 1) {
         const only = group.members[0];
+        if (!onScreen(only) && only.id !== pinnedId) {
+          markers.get(only.id).setMap(null);
+          return;
+        }
         const pt = truePt(only);
         nodes.push({ station: only, x: pt.x, y: pt.y, tx: pt.x, ty: pt.y, fixed: only.id === pinnedId });
         return;
@@ -906,7 +932,9 @@ function initMap(mapEl, stage, wrap, list) {
       // there -- so when it is in a group it anchors the fan and everyone else
       // arranges around it rather than around the centroid.
       const anchor = group.members.find((m) => m.id === pinnedId);
-      const fanned = group.members.filter((m) => m.id !== pinnedId);
+      const fanned = group.members.filter((m) => m.id !== pinnedId && onScreen(m));
+      group.members.filter((m) => m.id !== pinnedId && !onScreen(m))
+        .forEach((m) => markers.get(m.id).setMap(null));
       let cx = group.x;
       let cy = group.y;
 
@@ -916,6 +944,16 @@ function initMap(mapEl, stage, wrap, list) {
         cy = pt.y;
         nodes.push({ station: anchor, x: pt.x, y: pt.y, tx: pt.x, ty: pt.y, fixed: true });
       }
+
+      // With the rest of the group off screen there is nothing left to fan around,
+      // so the survivor keeps its true coordinate and needs no leader line.
+      if (!anchor && fanned.length === 1) {
+        const only = fanned[0];
+        const pt = truePt(only);
+        nodes.push({ station: only, x: pt.x, y: pt.y, tx: pt.x, ty: pt.y, fixed: false });
+        return;
+      }
+      if (!fanned.length) return;
 
       // Smallest ring on which `n` pins of this width clear each other, rather than
       // a radius that grows unbounded and throws pins off the tile.
