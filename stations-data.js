@@ -56,9 +56,7 @@ export const STATIONS = [
 
   // Kodagu — 106 km east of the corridor, and the reason the tile frames the
   // visitor's own neighbourhood rather than every outlet at once.
-  // PLACEHOLDER NAME: the client sent the coordinates without one. Replace
-  // 'Fawaky Outlet' with the shop's real name when it arrives.
-  { id: 'fawaky-hodavada', name: 'Fawaky Outlet', area: 'Hodavada, Kodagu', lat: 12.311460, lng: 75.697823 },
+  { id: 'alfa-store-napoklu', name: 'Alfa Store', area: 'Napoklu, Kodagu', lat: 12.311460, lng: 75.697823 },
 
   // Marnamikatte
   { id: 'misbah-super-market', name: 'Misbah Super Market', area: 'Marnamikatte', lat: 12.8520042, lng: 74.8496309 },
