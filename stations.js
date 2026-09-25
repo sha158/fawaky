@@ -639,6 +639,7 @@ function initMap(mapEl, stage, wrap, list) {
       : ranked;
     (near.length ? near : ranked.slice(0, 1))
       .forEach(({ station }) => b.extend({ lat: station.lat, lng: station.lng }));
+    if (lastOrigin) b.extend({ lat: lastOrigin.lat, lng: lastOrigin.lng });
     return b;
   };
 
@@ -665,6 +666,16 @@ function initMap(mapEl, stage, wrap, list) {
       } else if (STATIONS[0]) {
         focusOn(STATIONS[0].lat, STATIONS[0].lng, 'expanded');
       }
+      return;
+    }
+    // A location but no route — it has not resolved yet, or it failed. Still better
+    // to frame where they are than a city they may not be in.
+    if (lastOrigin) {
+      map.fitBounds(neighbourhoodBounds(), PAD.collapsed);
+      // An outlet metres away would otherwise fit to street level.
+      google.maps.event.addListenerOnce(map, 'idle', () => {
+        if (map.getZoom() > FOCUS_ZOOM) map.setZoom(FOCUS_ZOOM);
+      });
       return;
     }
     map.setZoom(MAP_ZOOM);
@@ -754,6 +765,9 @@ function initMap(mapEl, stage, wrap, list) {
     // Independent of routing: if the route fails, the visitor should still be able
     // to see where they are relative to the station.
     if (!youAreHere) youAreHere = makeYouAreHere(map, origin.lat, origin.lng);
+    // Move to their neighbourhood now rather than after the route resolves — the
+    // route may take a second, or never arrive.
+    if (!currentRoute) frameMap('collapsed');
 
     // Only the nearest station gets a billed road route.
     const ranked = rankList(list, origin);
@@ -1031,12 +1045,11 @@ function initMap(mapEl, stage, wrap, list) {
   google.maps.event.addListenerOnce(projector, 'ready', renderClusters);
   map.addListener('idle', renderClusters);
 
-  // More than one outlet: frame them all instead of trusting a hardcoded centre.
-  if (STATIONS.length > 1) {
-    const bounds = new google.maps.LatLngBounds();
-    STATIONS.forEach((s) => bounds.extend({ lat: s.lat, lng: s.lng }));
-    map.fitBounds(bounds, 64);
-  }
+  // Framed the same way as every later re-frame: the visitor's neighbourhood once
+  // their location is known, the corridor's centre until then. This used to fit
+  // every outlet, which put the whole of Karnataka in the tile once one outlet
+  // landed 106 km from the rest.
+  frameMap('collapsed');
 
   map.addListener('click', card.close);
   // onCollapse re-frames rather than clearing: the route belongs to the page now,
