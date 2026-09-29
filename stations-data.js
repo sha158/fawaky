@@ -57,6 +57,7 @@ export const STATIONS = [
   // Kodagu — 106 km east of the corridor, and the reason the tile frames the
   // visitor's own neighbourhood rather than every outlet at once.
   { id: 'alfa-store-napoklu', name: 'Alfa Store', area: 'Napoklu, Kodagu', lat: 12.311460, lng: 75.697823 },
+  { id: 'abc-super-market-napoklu', name: 'ABC Super Market', area: 'Napoklu, Kodagu', lat: 12.30463394722554, lng: 75.68287545325323 },
 
   // Marnamikatte
   { id: 'misbah-super-market', name: 'Misbah Super Market', area: 'Marnamikatte', lat: 12.8520042, lng: 74.8496309 },
