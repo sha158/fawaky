@@ -58,6 +58,7 @@ export const STATIONS = [
   // visitor's own neighbourhood rather than every outlet at once.
   { id: 'alfa-store-napoklu', name: 'Alfa Store', area: 'Napoklu, Kodagu', lat: 12.311460, lng: 75.697823 },
   { id: 'abc-super-market-napoklu', name: 'ABC Super Market', area: 'Napoklu, Kodagu', lat: 12.30463394722554, lng: 75.68287545325323 },
+  { id: 'drips-cafe-kondangeri', name: 'Drips Cafe', area: 'Kondangeri, Kodagu', lat: 12.299515880954008, lng: 75.79502591092404 },
 
   // Marnamikatte
   { id: 'misbah-super-market', name: 'Misbah Super Market', area: 'Marnamikatte', lat: 12.8520042, lng: 74.8496309 },
