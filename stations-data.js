@@ -46,6 +46,9 @@ export const STATIONS = [
 
   // Bendoorwell
   { id: 'attil-restaurant', name: 'Attil Restaurant', area: 'Bendoorwell', lat: 12.8705436, lng: 74.8570234 },
+  { id: 'royal-treat-family-restaurant', name: 'Royal Treat Family Restaurant', area: 'Bendoorwell', lat: 12.8713261, lng: 74.8569875 },
+  { id: 'colaco-canteen', name: 'Colaco Canteen, Colaco Hospital', area: 'Bendoorwell', lat: 12.8726162, lng: 74.8562855 },
+  { id: 'super-foodmart-bendoor', name: 'Super FoodMart Bendoor', area: 'Bendoorwell', lat: 12.8728659, lng: 74.8560209 },
 
   // Valencia
   { id: 'spectrum-gaming', name: 'Spectrum Gaming Snooker & Playstation', area: 'Valencia', lat: 12.8639653, lng: 74.8577798 },
@@ -71,6 +74,33 @@ export const STATIONS = [
 
   // Bolar
   { id: 'ah-bakery-bolar', name: 'A.H Bakery', area: 'Bolar', lat: 12.8470241, lng: 74.8448006 },
+
+  // Falnir
+  { id: 'indian-fresh-falnir', name: 'INDIAN FRESH', area: 'Falnir', lat: 12.8657362, lng: 74.8541769 },
+  { id: 'drip-n-drop', name: 'Drip N Drop', area: 'Falnir', lat: 12.8672960, lng: 74.8537917 },
+  { id: 'lifeline-healthcare-cafe', name: 'Lifeline Healthcare Cafe', area: 'Falnir', lat: 12.8676343, lng: 74.8531419 },
+
+  // Balmatta
+  { id: 'hok-house-of-koobideh', name: 'HOK House Of Koobideh', area: 'Balmatta', lat: 12.8737010, lng: 74.8528626 },
+  { id: 'hotel-mangalore-donne-biryani', name: 'Hotel Mangalore Donne Biryani', area: 'Balmatta', lat: 12.8731947, lng: 74.8512563 },
+
+  // Jyothi Circle
+  { id: 'hotel-food-junction', name: 'Hotel Food Junction', area: 'Jyothi Circle', lat: 12.8725469, lng: 74.8491521 },
+
+  // Attavar
+  { id: 'aayans-shawarma', name: "Aayan's Shawarma", area: 'Attavar', lat: 12.8641026, lng: 74.8496212 },
+  { id: 'ah-store-attavar', name: 'A.H STORE', area: 'Attavar', lat: 12.8641477, lng: 74.8493439 },
+  { id: 'attavar-cafe', name: 'Attavar Cafe', area: 'Attavar', lat: 12.8638594, lng: 74.8466201 },
+  { id: 'legacy-8-ball-cafe-lounge', name: 'LEGACY 8- Ball Cafe & Lounge', area: 'Attavar', lat: 12.8637156, lng: 74.8468012 },
+
+  // Hampankatte
+  // A second Misbah Super Market, ~1.9 km from the Marnamikatte one — a branch,
+  // not a repeat. The area line is what tells the two rows apart.
+  { id: 'misbah-super-market-hampankatte', name: 'Misbah Super Market', area: 'near Athena Hospital, Close to Hampankatte', lat: 12.8678503, lng: 74.8472068 },
+  { id: 'taj-rasoi-family-dine', name: 'Taj Rasoi Family Dine', area: 'Hampankatte', lat: 12.8681213, lng: 74.8471384 },
+  { id: 'juice-box-perfect-pass', name: 'Juice Box, Perfect Pass', area: 'Don Bosco Rd, Hampankatte', lat: 12.8690172, lng: 74.8464310 },
+  { id: 'noor-canteen', name: 'NOOR CANTEEN', area: 'Attavar Rd, Hampankatte', lat: 12.8668047, lng: 74.8444780 },
+  { id: 'mm-cake-paradise', name: 'M M Cake Paradise', area: 'Opp Milagris Church, Hampankatte', lat: 12.8678376, lng: 74.8439895 },
 ];
 
 /* The view before location is known or anything selected: the centre of the
