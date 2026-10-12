@@ -40,6 +40,7 @@ export const STATIONS = [
 
   // Kankanady
   { id: 'story-bakes', name: 'Story Bakes', area: 'Old Kankanady Rd', lat: 12.8689119, lng: 74.8625082 },
+  { id: 'impala-z-mart', name: 'Impala Z mart', area: 'Kankanady Old Road', lat: 12.867621429086618, lng: 74.85851558288859 },
   { id: 'swagath-sweets', name: 'Swagath Sweets', area: 'Kankanady', lat: 12.8681072, lng: 74.8579581 },
   { id: 'fresh-bakery', name: 'Fresh Bakery', area: 'Kankanady', lat: 12.8696719, lng: 74.8582358 },
   { id: 'indian-foods-salafi', name: 'Indian Foods', area: 'Salafi Center, Kankanady', lat: 12.8683076, lng: 74.8569523 },
@@ -90,10 +91,17 @@ export const STATIONS = [
   // Attavar
   { id: 'aayans-shawarma', name: "Aayan's Shawarma", area: 'Attavar', lat: 12.8641026, lng: 74.8496212 },
   { id: 'ah-store-attavar', name: 'A.H STORE', area: 'Attavar', lat: 12.8641477, lng: 74.8493439 },
+  { id: 'chai-sukoon', name: 'Chai Sukoon', area: 'Attavara', lat: 12.86001803284954, lng: 74.84795536936255 },
+  { id: 'rimaal-mandi', name: 'Rimaal Mandi', area: 'Attavara', lat: 12.861374552016068, lng: 74.84759944935507 },
+  { id: 'laziz-pizza', name: 'Laziz Pizza', area: 'Attavara', lat: 12.860638617688902, lng: 74.84741059896741 },
   { id: 'attavar-cafe', name: 'Attavar Cafe', area: 'Attavar', lat: 12.8638594, lng: 74.8466201 },
   { id: 'legacy-8-ball-cafe-lounge', name: 'LEGACY 8- Ball Cafe & Lounge', area: 'Attavar', lat: 12.8637156, lng: 74.8468012 },
 
   // Hampankatte
+  // Labelled Hampankatte by the client, but the point sits ~1.5 km east of the other
+  // Hampankatte outlets and ~230 m from Story Bakes in Old Kankanady. Stored as sent;
+  // confirm with the client before changing either the label or the coordinates.
+  { id: 'zayd-foods', name: 'Zayd Foods', area: 'Hampankatte', lat: 12.8698896, lng: 74.8606766 },
   // A second Misbah Super Market, ~1.9 km from the Marnamikatte one — a branch,
   // not a repeat. The area line is what tells the two rows apart.
   { id: 'misbah-super-market-hampankatte', name: 'Misbah Super Market', area: 'near Athena Hospital, Close to Hampankatte', lat: 12.8678503, lng: 74.8472068 },
@@ -101,6 +109,10 @@ export const STATIONS = [
   { id: 'juice-box-perfect-pass', name: 'Juice Box, Perfect Pass', area: 'Don Bosco Rd, Hampankatte', lat: 12.8690172, lng: 74.8464310 },
   { id: 'noor-canteen', name: 'NOOR CANTEEN', area: 'Attavar Rd, Hampankatte', lat: 12.8668047, lng: 74.8444780 },
   { id: 'mm-cake-paradise', name: 'M M Cake Paradise', area: 'Opp Milagris Church, Hampankatte', lat: 12.8678376, lng: 74.8439895 },
+  { id: 'sattvva-cafe', name: 'Sattvva Cafe', area: 'Hampankatte', lat: 12.869135, lng: 74.840135 },
+
+  // Kodialbail
+  { id: 'arogya-fruits-and-juice-centre', name: 'Arogya Fruits and Juice Centre', area: 'Kodialbail', lat: 12.873331, lng: 74.841401 },
 ];
 
 /* The view before location is known or anything selected: the centre of the
