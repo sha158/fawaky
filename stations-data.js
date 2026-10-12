@@ -88,26 +88,23 @@ export const STATIONS = [
   // Jyothi Circle
   { id: 'hotel-food-junction', name: 'Hotel Food Junction', area: 'Jyothi Circle', lat: 12.8725469, lng: 74.8491521 },
 
-  // Attavar
-  { id: 'aayans-shawarma', name: "Aayan's Shawarma", area: 'Attavar', lat: 12.8641026, lng: 74.8496212 },
-  { id: 'ah-store-attavar', name: 'A.H STORE', area: 'Attavar', lat: 12.8641477, lng: 74.8493439 },
+  // Attavara
+  { id: 'aayans-shawarma', name: "Aayan's Shawarma", area: 'Attavara', lat: 12.8641026, lng: 74.8496212 },
+  { id: 'ah-store-attavar', name: 'A.H STORE', area: 'Attavara', lat: 12.8641477, lng: 74.8493439 },
   { id: 'chai-sukoon', name: 'Chai Sukoon', area: 'Attavara', lat: 12.86001803284954, lng: 74.84795536936255 },
   { id: 'rimaal-mandi', name: 'Rimaal Mandi', area: 'Attavara', lat: 12.861374552016068, lng: 74.84759944935507 },
   { id: 'laziz-pizza', name: 'Laziz Pizza', area: 'Attavara', lat: 12.860638617688902, lng: 74.84741059896741 },
-  { id: 'attavar-cafe', name: 'Attavar Cafe', area: 'Attavar', lat: 12.8638594, lng: 74.8466201 },
-  { id: 'legacy-8-ball-cafe-lounge', name: 'LEGACY 8- Ball Cafe & Lounge', area: 'Attavar', lat: 12.8637156, lng: 74.8468012 },
+  { id: 'attavar-cafe', name: 'Attavar Cafe', area: 'Attavara', lat: 12.8638594, lng: 74.8466201 },
+  { id: 'legacy-8-ball-cafe-lounge', name: 'LEGACY 8- Ball Cafe & Lounge', area: 'Attavara', lat: 12.8637156, lng: 74.8468012 },
 
   // Hampankatte
-  // Labelled Hampankatte by the client, but the point sits ~1.5 km east of the other
-  // Hampankatte outlets and ~230 m from Story Bakes in Old Kankanady. Stored as sent;
-  // confirm with the client before changing either the label or the coordinates.
   { id: 'zayd-foods', name: 'Zayd Foods', area: 'Hampankatte', lat: 12.8698896, lng: 74.8606766 },
   // A second Misbah Super Market, ~1.9 km from the Marnamikatte one — a branch,
   // not a repeat. The area line is what tells the two rows apart.
   { id: 'misbah-super-market-hampankatte', name: 'Misbah Super Market', area: 'near Athena Hospital, Close to Hampankatte', lat: 12.8678503, lng: 74.8472068 },
   { id: 'taj-rasoi-family-dine', name: 'Taj Rasoi Family Dine', area: 'Hampankatte', lat: 12.8681213, lng: 74.8471384 },
   { id: 'juice-box-perfect-pass', name: 'Juice Box, Perfect Pass', area: 'Don Bosco Rd, Hampankatte', lat: 12.8690172, lng: 74.8464310 },
-  { id: 'noor-canteen', name: 'NOOR CANTEEN', area: 'Attavar Rd, Hampankatte', lat: 12.8668047, lng: 74.8444780 },
+  { id: 'noor-canteen', name: 'NOOR CANTEEN', area: 'Attavara Rd, Hampankatte', lat: 12.8668047, lng: 74.8444780 },
   { id: 'mm-cake-paradise', name: 'M M Cake Paradise', area: 'Opp Milagris Church, Hampankatte', lat: 12.8678376, lng: 74.8439895 },
   { id: 'sattvva-cafe', name: 'Sattvva Cafe', area: 'Hampankatte', lat: 12.869135, lng: 74.840135 },
 
