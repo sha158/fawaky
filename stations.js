@@ -3,7 +3,7 @@
    is near the viewport, so visitors who never scroll this far cost nothing. */
 
 import {
-  STATIONS, MAP_CENTER, MAP_ZOOM, FOCUS_ZOOM, directionsUrl, nearestStation,
+  STATIONS, MAP_CENTER, MAP_ZOOM, FOCUS_ZOOM, directionsUrl, haversineKm, nearestStation,
   stationsByDistance,
 } from './stations-data.js';
 // Imported, not a runtime '/assets/...' string: that way Vite emits and hashes
@@ -594,8 +594,8 @@ function initMap(mapEl, stage, wrap, list) {
   /* Centre a point in the strip above the bottom sheet rather than behind it, by
      shifting the target centre south in world coordinates. A panBy here would race
      the zoom animation and land somewhere arbitrary. */
-  const focusOn = (lat, lng, mode) => {
-    const zoom = Math.max(map.getZoom() || 0, FOCUS_ZOOM);
+  const focusOn = (lat, lng, mode, minZoom = FOCUS_ZOOM) => {
+    const zoom = Math.max(map.getZoom() || 0, minZoom);
     const sheet = expanded || window.matchMedia('(max-width: 768px)').matches;
     const offsetPx = sheet ? OFFSET_PX[mode || (expanded ? 'expanded' : 'collapsed')] : 0;
     // 156543.03392 m/px at zoom 0 on the equator; /111320 converts metres to degrees.
@@ -618,6 +618,9 @@ function initMap(mapEl, stage, wrap, list) {
   const PAD = {
     collapsed: { top: 78, right: 28, bottom: 44, left: 28 },
     expanded: { top: 104, right: 40, bottom: 220, left: 40 },
+    // Expanded with no route: nothing selected yet, so no sheet to clear, but the
+    // hint pill and the locate button sit over the top and bottom edges.
+    overview: { top: 96, right: 56, bottom: 96, left: 56 },
   };
 
   /* Three states to frame, not two: a drawn route wins over everything, because
@@ -631,16 +634,37 @@ function initMap(mapEl, stage, wrap, list) {
   const NEARBY_KM = 10; // the corridor is ~7 km end to end
   const NEARBY_MAX = 8; // and no more pins than a tile can show at once
 
-  const neighbourhoodBounds = () => {
+  // Around the visitor, or around the corridor's centre until we know where they
+  // are: outlets within NEARBY_KM, nearest first, at most `cap` of them.
+  const neighbourhoodBounds = (cap = NEARBY_MAX) => {
     const b = new google.maps.LatLngBounds();
-    const ranked = stationsByDistance(lastOrigin);
-    const near = lastOrigin
-      ? ranked.filter((r) => r.km <= NEARBY_KM).slice(0, NEARBY_MAX)
-      : ranked;
+    const ranked = stationsByDistance(lastOrigin || MAP_CENTER);
+    const near = ranked.filter((r) => r.km <= NEARBY_KM).slice(0, cap);
     (near.length ? near : ranked.slice(0, 1))
       .forEach(({ station }) => b.extend({ lat: station.lat, lng: station.lng }));
     if (lastOrigin) b.extend({ lat: lastOrigin.lat, lng: lastOrigin.lng });
     return b;
+  };
+
+  /* fitBounds, but never closer than FOCUS_ZOOM — round an outlet a few metres from
+     the visitor it would zoom to street level. The bounds are widened up front. The
+     old fix capped the zoom on the next idle, but a fit that leaves the view as it
+     was fires no idle, so the cap waited for the visitor's own zoom-in and snapped
+     it straight back out. */
+  const fitNear = (bounds, pad) => {
+    const ne = bounds.getNorthEast();
+    const sw = bounds.getSouthWest();
+    const lat = (ne.lat() + sw.lat()) / 2;
+    const lng = (ne.lng() + sw.lng()) / 2;
+    // Degrees of longitude per pixel at FOCUS_ZOOM; latitude is that times cos(lat).
+    // 0.95 so the fit lands on FOCUS_ZOOM rather than a rounding error past it.
+    const deg = (360 / (256 * 2 ** FOCUS_ZOOM)) * 0.95;
+    const halfLng = (Math.max(mapEl.clientWidth - pad.left - pad.right, 1) * deg) / 2;
+    const halfLat = (Math.max(mapEl.clientHeight - pad.top - pad.bottom, 1) * deg
+      * Math.cos((lat * Math.PI) / 180)) / 2;
+    bounds.extend({ lat: lat + halfLat, lng: lng + halfLng });
+    bounds.extend({ lat: lat - halfLat, lng: lng - halfLng });
+    map.fitBounds(bounds, pad);
   };
 
   const frameMap = (mode) => {
@@ -658,28 +682,22 @@ function initMap(mapEl, stage, wrap, list) {
       map.fitBounds(both, PAD[m]);
       return;
     }
+    // No route. Expanded shows every outlet around the visitor, not every outlet
+    // there is: fitting the three in Kodagu as well put half the state in view,
+    // with all of Mangaluru's outlets heaped in one corner of it.
     if (m === 'expanded') {
-      if (STATIONS.length > 1) {
-        const bounds = new google.maps.LatLngBounds();
-        STATIONS.forEach((s) => bounds.extend({ lat: s.lat, lng: s.lng }));
-        map.fitBounds(bounds, 64);
-      } else if (STATIONS[0]) {
-        focusOn(STATIONS[0].lat, STATIONS[0].lng, 'expanded');
-      }
+      fitNear(neighbourhoodBounds(Infinity), PAD.overview);
       return;
     }
     // A location but no route — it has not resolved yet, or it failed. Still better
     // to frame where they are than a city they may not be in.
     if (lastOrigin) {
-      map.fitBounds(neighbourhoodBounds(), PAD.collapsed);
-      // An outlet metres away would otherwise fit to street level.
-      google.maps.event.addListenerOnce(map, 'idle', () => {
-        if (map.getZoom() > FOCUS_ZOOM) map.setZoom(FOCUS_ZOOM);
-      });
+      fitNear(neighbourhoodBounds(), PAD.collapsed);
       return;
     }
-    map.setZoom(MAP_ZOOM);
-    map.setCenter(MAP_CENTER);
+    // Nowhere known yet: the corridor. A fixed zoom round MAP_CENTER cut both ends
+    // of it off a phone-width tile.
+    fitNear(neighbourhoodBounds(Infinity), PAD.collapsed);
   };
 
   const clearRoute = () => {
@@ -709,9 +727,9 @@ function initMap(mapEl, stage, wrap, list) {
 
   const select = (station) => {
     pinnedId = station.id;
-    renderClusters();
+    renderMarkers();
     const marker = markers.get(station.id);
-    focusOn(station.lat, station.lng);
+    focusOn(station.lat, station.lng, undefined, clearZoom(station));
     if (marker && !reducedMotion) {
       marker.setAnimation(google.maps.Animation.BOUNCE);
       setTimeout(() => marker.setAnimation(null), 700);
@@ -780,7 +798,7 @@ function initMap(mapEl, stage, wrap, list) {
     if (!route) return;
 
     pinnedId = station.id;
-    renderClusters();
+    renderMarkers();
     drawRoute(route);
     setRowDistance(station.id, nearestKm != null
       ? `${kmLabel(nearestKm)} away · ${route.duration} drive`
@@ -800,18 +818,23 @@ function initMap(mapEl, stage, wrap, list) {
     frameMap(mode);
   };
 
-  /* ── Clustering ──
-     Screen-space grouping rather than @googlemaps/markerclusterer: that package is
-     ~1 MB unpacked and pulls in supercluster, built for thousands of points. At this
-     scale the whole algorithm is one pass, and doing it here lets the bubble carry
-     brand styling and handle coincident outlets properly. */
-  // Collide at roughly the pin's own width — no wider, or unrelated pins chain
-  // into one enormous fan.
-  const clusterPx = () => pinWidth() + 6;
-  // An idle overlay purely to borrow its lat/lng -> pixel projection.
+  /* ── Pins and dots ──
+     Every outlet is drawn on its own coordinate, always. It gets the full can pin
+     where that pin has room; where the pin would cover a neighbour it is drawn as a
+     small dot instead, and grows into a pin once the map is zoomed in far enough to
+     separate them — the way Google's own map thins out crowded places.
+
+     This replaced a fan-out that pushed colliding pins apart and drew a green leader
+     line from each back to its true point. It held at 11 outlets. At ~60 along a
+     7 km corridor nearly every pin was displaced, the fans merged into a disc of
+     pins up to 90px from their shops, and the leaders read as stray green scratches
+     across the map. Count bubbles are no answer either: the client turned down "5"
+     and "3" bubbles in favour of seeing every outlet. */
+
+  // An idle overlay purely to borrow its lat/lng -> pixel projection. Attached
+  // below, once the layout it triggers exists.
   const projector = new google.maps.OverlayView();
   projector.draw = () => {};
-  projector.setMap(map);
 
   // A 56px pin covers ~900 m of ground at the overview zoom, so it shrinks when
   // zoomed out and returns to full size once there is room for it.
@@ -822,231 +845,133 @@ function initMap(mapEl, stage, wrap, list) {
     anchor: new google.maps.Point(w / 2, Math.round(w * 1.25)),
   });
 
+  // The pin's own purple body and white rim, at a size that still reads as a place.
+  const dotRadius = () => ((map.getZoom() || MAP_ZOOM) >= 12 ? 7 : 5);
+  const dotIcon = (r) => ({
+    path: google.maps.SymbolPath.CIRCLE,
+    scale: r,
+    fillColor: '#5E1F78',
+    fillOpacity: 1,
+    strokeColor: '#FFFFFF',
+    strokeWeight: 2,
+  });
+
+  // Dots under pins, and the outlet being routed to or just tapped above both.
+  const Z = { dot: 1, pin: 2, pinned: 3 };
+
   STATIONS.forEach((station) => {
     const marker = new google.maps.Marker({
       position: { lat: station.lat, lng: station.lng },
       title: `${station.name} — ${station.area}`,
-      icon: pinIcon(36),
+      // On the map as a dot from the start, so every outlet shows even before the
+      // first layout pass has run.
+      icon: dotIcon(dotRadius()),
+      zIndex: Z.dot,
+      map,
     });
     marker.addListener('click', () => select(station));
     markers.set(station.id, marker);
   });
 
-  // The station the visitor is being routed to is never fanned: it is the one
-  // marker that has to stay on its true coordinate, since the polyline ends there.
+  // What each marker shows now, so a layout pass touches only the markers whose
+  // look actually changed rather than re-setting all ~60 icons on every pan.
+  const shown = new Map();
+
+  // The outlet being routed to, or the one just tapped, is always a full pin -- the
+  // polyline ends there, and it is the one the visitor is looking for.
   let pinnedId = null;
 
-  /* Groups stations whose pins would collide on screen at the current zoom. */
-  const groupStations = () => {
-    const projection = projector.getProjection();
-    if (!projection) return null;
-    const groups = [];
-    STATIONS.forEach((station) => {
-      const pt = projection.fromLatLngToDivPixel(
-        new google.maps.LatLng(station.lat, station.lng));
-      if (!pt) return;
-      const hit = groups.find((g) => Math.hypot(g.x - pt.x, g.y - pt.y) <= clusterPx());
-      if (hit) {
-        hit.members.push(station);
-        hit.x = (hit.x * (hit.members.length - 1) + pt.x) / hit.members.length;
-        hit.y = (hit.y * (hit.members.length - 1) + pt.y) / hit.members.length;
-      } else {
-        groups.push({ x: pt.x, y: pt.y, members: [station] });
-      }
-    });
-    return groups;
-  };
+  // Shops in one doorway (Hotel Badriya and H.N Store, 2.1 m apart). No zoom level
+  // separates them, so one pin stands for both and the list names each.
+  const COINCIDENT_PX = 4;
 
-  /* Spiderfy rather than cluster. The outlets are genuinely too close to draw at
-     true coordinates -- 17 of the 55 pairs sit under one pin-width at default zoom,
-     and five Adyar Kannur shops land 2-4px apart -- so drawing them raw would hide
-     four of five behind the fifth. Fanning keeps every pin visible and tappable, and
-     a leader line back to the true coordinate keeps it honest. */
-  const FAN_START = -Math.PI / 2; // first pin sits above the centroid
-  let leaderLines = [];
-
-  const clearLeaders = () => {
-    leaderLines.forEach((l) => l.setMap(null));
-    leaderLines = [];
-  };
-
-  /* Fanning fixes collisions inside a group but knows nothing about the group next
-     door, and along a corridor as dense as this one two fans end up on top of each
-     other — at 30 outlets the closest drawn pair sat 12px apart with 36px pins. So
-     the fan is only the opening layout; this pass then pushes any two pins still
-     overlapping apart until none do. A few passes, not a running simulation: the
-     layout has to come out the same on every idle or the pins would crawl on pan. */
-  const RELAX_PASSES = 8;
-  const MAX_DISPLACEMENT = 90; // px a pin may end up from its true point
-
-  const relax = (nodes, minDist) => {
-    for (let pass = 0; pass < RELAX_PASSES; pass += 1) {
-      let moved = false;
-      for (let i = 0; i < nodes.length; i += 1) {
-        for (let j = i + 1; j < nodes.length; j += 1) {
-          const a = nodes[i];
-          const b = nodes[j];
-          if (a.fixed && b.fixed) continue;
-          let dx = b.x - a.x;
-          let dy = b.y - a.y;
-          let d = Math.hypot(dx, dy);
-          if (d >= minDist) continue;
-          if (d < 0.01) { dx = Math.cos(i); dy = Math.sin(i); d = 1; } // exactly coincident
-          const push = (minDist - d) / 2;
-          const ux = (dx / d) * push;
-          const uy = (dy / d) * push;
-          // The routed destination cannot move, so it hands its whole share of the
-          // push to the other pin rather than staying overlapped.
-          if (a.fixed) { b.x += ux * 2; b.y += uy * 2; }
-          else if (b.fixed) { a.x -= ux * 2; a.y -= uy * 2; }
-          else { a.x -= ux; a.y -= uy; b.x += ux; b.y += uy; }
-          moved = true;
-        }
-      }
-      if (!moved) break;
-    }
-  };
-
-  const renderClusters = () => {
-    const projection = projector.getProjection();
-    const groups = groupStations();
-    if (!projection || !groups) return;
-    clearLeaders();
-    const w = pinWidth();
-    const icon = pinIcon(w);
-    markers.forEach((m) => m.setIcon(icon));
-
-    const truePt = (station) => projection.fromLatLngToDivPixel(
-      new google.maps.LatLng(station.lat, station.lng));
-
-    /* Now the tile frames a neighbourhood rather than the whole network, most
-       outlets are off screen on any given view. Clamping those into the viewport
-       would line the edges with pins on long leader lines pointing at nothing, so a
-       pin whose TRUE point is outside the tile is taken off the map instead. */
-    const viewport = map.getBounds && map.getBounds();
-    const onScreen = (station) => !viewport
-      || viewport.contains(new google.maps.LatLng(station.lat, station.lng));
-
-    // Where every pin wants to be drawn, before anyone checks whether two of them
-    // want the same place.
-    const nodes = [];
-    groups.forEach((group) => {
-      if (group.members.length === 1) {
-        const only = group.members[0];
-        if (!onScreen(only) && only.id !== pinnedId) {
-          markers.get(only.id).setMap(null);
-          return;
-        }
-        const pt = truePt(only);
-        nodes.push({ station: only, x: pt.x, y: pt.y, tx: pt.x, ty: pt.y, fixed: only.id === pinnedId });
-        return;
-      }
-
-      // The routed destination stays on its true coordinate -- the polyline ends
-      // there -- so when it is in a group it anchors the fan and everyone else
-      // arranges around it rather than around the centroid.
-      const anchor = group.members.find((m) => m.id === pinnedId);
-      const fanned = group.members.filter((m) => m.id !== pinnedId && onScreen(m));
-      group.members.filter((m) => m.id !== pinnedId && !onScreen(m))
-        .forEach((m) => markers.get(m.id).setMap(null));
-      let cx = group.x;
-      let cy = group.y;
-
-      if (anchor) {
-        const pt = truePt(anchor);
-        cx = pt.x;
-        cy = pt.y;
-        nodes.push({ station: anchor, x: pt.x, y: pt.y, tx: pt.x, ty: pt.y, fixed: true });
-      }
-
-      // With the rest of the group off screen there is nothing left to fan around,
-      // so the survivor keeps its true coordinate and needs no leader line.
-      if (!anchor && fanned.length === 1) {
-        const only = fanned[0];
-        const pt = truePt(only);
-        nodes.push({ station: only, x: pt.x, y: pt.y, tx: pt.x, ty: pt.y, fixed: false });
-        return;
-      }
-      if (!fanned.length) return;
-
-      // Smallest ring on which `n` pins of this width clear each other, rather than
-      // a radius that grows unbounded and throws pins off the tile.
-      const n = Math.max(fanned.length, 2);
-      const radius = Math.max(w * 0.72, Math.min(72, (w * 0.62) / (2 * Math.sin(Math.PI / n))));
-      fanned.forEach((station, i) => {
-        const angle = FAN_START + (2 * Math.PI * i) / fanned.length;
-        const pt = truePt(station);
-        nodes.push({
-          station,
-          x: cx + radius * Math.cos(angle),
-          y: cy + radius * Math.sin(angle),
-          tx: pt.x,
-          ty: pt.y,
-          fixed: false,
-        });
+  /* The zoom at which a tapped outlet's pin stops covering a neighbour. The tapped
+     pin is always drawn whole, so at FOCUS_ZOOM it can sit on a shop 80 m north of
+     it — Laziz Pizza hid Rimaal Mandi. Shops within COINCIDENT_M share a doorway
+     and never separate, so those are left to the list; capped at street level. */
+  const COINCIDENT_M = 10;
+  const MAX_CLEAR_ZOOM = 18;
+  const clearZoom = (station) => {
+    const w = 56; // pinWidth() and dotRadius() at every zoom this loop visits
+    const h = Math.round(w * 1.25);
+    const r = 7;
+    const stretch = 1 / Math.cos((station.lat * Math.PI) / 180); // Mercator, locally
+    for (let z = FOCUS_ZOOM; z < MAX_CLEAR_ZOOM; z += 1) {
+      const pxPerDeg = (256 * 2 ** z) / 360;
+      const covered = STATIONS.some((o) => {
+        if (o === station || haversineKm(o, station) * 1000 < COINCIDENT_M) return false;
+        const dx = (o.lng - station.lng) * pxPerDeg;
+        const dy = -(o.lat - station.lat) * pxPerDeg * stretch;
+        return Math.abs(dx) < w / 2 + r && dy > -h - r && dy < r;
       });
+      if (!covered) return z;
+    }
+    return MAX_CLEAR_ZOOM;
+  };
+
+  /* Who gets a pin first when two want the same place: the pinned outlet, then the
+     nearest to the visitor, or to the corridor's centre until we know where they
+     are. Depends on zoom alone, never on pan, so nothing reshuffles while dragging. */
+  const layoutOrder = () => {
+    const ranked = stationsByDistance(lastOrigin || MAP_CENTER).map((r) => r.station);
+    const pinned = ranked.find((s) => s.id === pinnedId);
+    return pinned ? [pinned, ...ranked.filter((s) => s !== pinned)] : ranked;
+  };
+
+  const renderMarkers = () => {
+    const projection = projector.getProjection();
+    if (!projection) return;
+    const w = pinWidth();
+    const h = Math.round(w * 1.25);
+    const r = dotRadius();
+
+    const points = new Map();
+    STATIONS.forEach((s) => {
+      const pt = projection.fromLatLngToDivPixel(new google.maps.LatLng(s.lat, s.lng));
+      if (pt) points.set(s.id, pt);
     });
 
-    relax(nodes, w * 0.9);
+    // The pin hangs entirely above its point: a w x h box with the tip at the
+    // bottom centre. 2px of air between neighbouring pins.
+    const box = (pt) => ({ l: pt.x - w / 2, r: pt.x + w / 2, t: pt.y - h, b: pt.y });
+    const overlaps = (a, b) => a.l < b.r + 2 && b.l < a.r + 2 && a.t < b.b + 2 && b.t < a.b + 2;
+    const covers = (bx, pt) => pt.x > bx.l - r && pt.x < bx.r + r && pt.y > bx.t - r && pt.y < bx.b + r;
 
-    /* Pushing pins apart can push them off the tile — the map framed itself before
-       any of this ran. Keep every pin inside the viewport, in the same pixel space
-       the projection works in. (The stub map in the tests has no getBounds; without
-       bounds there is nothing to clamp to and the pass is skipped.) */
-    const bounds = map.getBounds && map.getBounds();
-    const edge = bounds && (() => {
-      const ne = projection.fromLatLngToDivPixel(bounds.getNorthEast());
-      const sw = projection.fromLatLngToDivPixel(bounds.getSouthWest());
-      if (!ne || !sw) return null;
-      // The pin hangs entirely ABOVE its point and half a width either side of it,
-      // so the top edge needs a whole pin's height of room and the bottom almost none.
-      const half = w / 2 + 4;
-      const tall = Math.round(w * 1.25) + 4;
-      return {
-        minX: Math.min(ne.x, sw.x) + half,
-        maxX: Math.max(ne.x, sw.x) - half,
-        minY: Math.min(ne.y, sw.y) + tall,
-        maxY: Math.max(ne.y, sw.y) - 4,
-      };
-    })();
+    const placed = [];
+    layoutOrder().forEach((station) => {
+      const pt = points.get(station.id);
+      if (!pt) return;
+      const bx = box(pt);
+      const pinned = station.id === pinnedId;
+      const fits = pinned || (
+        !placed.some((p) => overlaps(p, bx))
+        // A pin may not land on another outlet's dot, or that outlet disappears.
+        && !STATIONS.some((other) => {
+          const q = other !== station && points.get(other.id);
+          return q && Math.hypot(q.x - pt.x, q.y - pt.y) > COINCIDENT_PX && covers(bx, q);
+        }));
+      if (fits) placed.push(bx);
 
-    nodes.forEach((node) => {
-      if (edge && edge.maxX > edge.minX && edge.maxY > edge.minY) {
-        node.x = Math.min(Math.max(node.x, edge.minX), edge.maxX);
-        node.y = Math.min(Math.max(node.y, edge.minY), edge.maxY);
-      }
-      let dx = node.x - node.tx;
-      let dy = node.y - node.ty;
-      const away = Math.hypot(dx, dy);
-      // However crowded it gets, a pin stays within sight of the place it stands for.
-      if (away > MAX_DISPLACEMENT) {
-        const k = MAX_DISPLACEMENT / away;
-        dx *= k;
-        dy *= k;
-      }
-      const marker = markers.get(node.station.id);
-      const position = away < 1
-        ? { lat: node.station.lat, lng: node.station.lng }
-        : projection.fromDivPixelToLatLng(new google.maps.Point(node.tx + dx, node.ty + dy));
-      marker.setPosition(position);
-      marker.setMap(map);
-      if (away < 1) return;
-      leaderLines.push(new google.maps.Polyline({
-        path: [position, { lat: node.station.lat, lng: node.station.lng }],
-        map,
-        strokeColor: '#92B83D',
-        strokeOpacity: 0.85,
-        strokeWeight: 2,
-        zIndex: 1,
-      }));
+      const kind = pinned ? 'pinned' : fits ? 'pin' : 'dot';
+      const look = kind === 'dot' ? `dot${r}` : `${kind}${w}`;
+      if (shown.get(station.id) === look) return;
+      shown.set(station.id, look);
+      const marker = markers.get(station.id);
+      marker.setIcon(kind === 'dot' ? dotIcon(r) : pinIcon(w));
+      marker.setZIndex(Z[kind]);
     });
   };
 
-  google.maps.event.addListenerOnce(projector, 'ready', renderClusters);
-  map.addListener('idle', renderClusters);
+  // The first layout runs from onAdd, the moment the projection exists. It used to
+  // wait on a 'ready' event that OverlayView never fires, which left it to the first
+  // idle -- and when the map went idle before the overlay was added, no pin was
+  // drawn at all until the visitor happened to move the map.
+  projector.onAdd = renderMarkers;
+  projector.setMap(map);
+  map.addListener('idle', renderMarkers);
 
   // Framed the same way as every later re-frame: the visitor's neighbourhood once
-  // their location is known, the corridor's centre until then. This used to fit
+  // their location is known, the Mangaluru corridor until then. This used to fit
   // every outlet, which put the whole of Karnataka in the tile once one outlet
   // landed 106 km from the rest.
   frameMap('collapsed');

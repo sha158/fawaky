@@ -57,8 +57,10 @@ window.google = { maps: {
     this.fitBounds=function(b,p){ window.__lastFit={b:b,p:p}; };
     this.addListener=function(ev,fn){ if(ev==='idle'){ window.__idle.push(fn); setTimeout(fn,0); } }; },
   Marker:function(o){ this.o=o; this.__clicks=[]; this.__on = !!o.map; this.__pos = o.position;
+    this.__true = o.position;
     this.setPosition=function(p){ this.__pos = p; };
     this.setIcon=function(ic){ this.o.icon = ic; };
+    this.setZIndex=function(z){ this.o.zIndex = z; };
     window.__markers = window.__markers || []; window.__markers.push(this);
     this.setMap=function(m){ this.__on = !!m; };
     this.addListener=function(e,fn){ this.__clicks.push(fn); };
@@ -68,20 +70,31 @@ window.__clusterState = function(){
   var ms = window.__markers || [];
   var on = ms.filter(function(m){ return m.__on; });
   var pins = on.filter(function(m){ return m.o && m.o.icon && m.o.icon.url; });
-  // Minimum on-screen separation between drawn pins — the whole point of fanning.
-  var minSep = Infinity, ppd = window.__pxPerDeg;
+  var dots = on.filter(function(m){ return m.o && m.o.icon && m.o.icon.path !== undefined; });
+  var ppd = window.__pxPerDeg;
+  function gx(p){ return (p.lng!==undefined?p.lng:p.__lng)*ppd; }
+  function gy(p){ return -(p.lat!==undefined?p.lat:p.__lat)*ppd; }
+  // Centre-to-centre distance between the closest two pins, and how many pairs of
+  // pin bodies (each w x 1.25w, hanging above its point) actually overlap.
+  var minSep = Infinity, overlapping = 0;
   for (var i=0;i<pins.length;i++) for (var j=i+1;j<pins.length;j++) {
     var a=pins[i].__pos, b=pins[j].__pos;
     if(!a||!b) continue;
-    var dx=((b.lng!==undefined?b.lng:b.__lng)-(a.lng!==undefined?a.lng:a.__lng))*ppd;
-    var dy=((b.lat!==undefined?b.lat:b.__lat)-(a.lat!==undefined?a.lat:a.__lat))*ppd;
+    var dx=gx(b)-gx(a), dy=gy(b)-gy(a);
     minSep = Math.min(minSep, Math.hypot(dx,dy));
+    var w=pins[i].o.icon.scaledSize.w, h=pins[i].o.icon.scaledSize.h;
+    if (Math.abs(dx) < w && Math.abs(dy) < h) overlapping++;
   }
+  // Furthest any marker sits from the coordinate it stands for, in pixels.
+  var displaced = 0;
+  on.forEach(function(m){ if(m.__pos&&m.__true) displaced = Math.max(displaced,
+    Math.hypot(gx(m.__pos)-gx(m.__true), gy(m.__pos)-gy(m.__true))); });
   var leaders = (window.__polylines||[]).filter(function(l){
     return l.o && l.o.strokeColor === '#92B83D'; }).length;
   return { bubbles: on.filter(function(m){ return m.o && m.o.label; })
                       .map(function(m){ return m.o.label.text; }),
-           pins: pins.length, leaders: leaders,
+           pins: pins.length, dots: dots.length, drawn: on.length, leaders: leaders,
+           overlapping: overlapping, displaced: Math.round(displaced),
            minSep: isFinite(minSep) ? Math.round(minSep) : null };
 };
 if (window.__fawakyMapsReady) window.__fawakyMapsReady();
@@ -160,6 +173,6 @@ await run('req-denied', { grant: true, forceStatus: 'PERMISSION_DENIED: Routes A
 await browser.close();
 for (const r of out) {
   const c = r.collapsed;
-  console.log(`${r.label.padEnd(11)} COLLAPSED lines=${c.lines} dot=${c.dot} rows=${c.rowsVisible}/${c.rowsTotal} first="${c.firstRow}" bubbles=[${c.cluster.bubbles}] pins=${c.cluster.pins} box=${c.scroller} card=${c.cardOpen} hint=${c.hintVisible}`);
+  console.log(`${r.label.padEnd(11)} COLLAPSED lines=${c.lines} dot=${c.dot} rows=${c.rowsVisible}/${c.rowsTotal} first="${c.firstRow}" bubbles=[${c.cluster.bubbles}] drawn=${c.cluster.drawn} pins=${c.cluster.pins} dots=${c.cluster.dots} leaders=${c.cluster.leaders} box=${c.scroller} card=${c.cardOpen} hint=${c.hintVisible}`);
   console.log(`${''.padEnd(11)} EXPANDED  lines=${r.lines} calls=${r.calls}->${r.callsAfterSecond} card=${r.cardOpen} afterCollapse=${r.afterCollapse} errors=${r.loud}`);
 }

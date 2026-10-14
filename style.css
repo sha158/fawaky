@@ -4132,6 +4132,9 @@ button:focus-visible,
 /* ─── Selected-station card ─── */
 .ls-station-card {
   position: absolute;
+  /* Above the "Use my location" button (z-index 2), which shares this corner and
+     otherwise sat on top of Get Directions. It shows again once the card closes. */
+  z-index: 3;
   left: 20px;
   bottom: 20px;
   width: 292px;
