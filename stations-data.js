@@ -48,6 +48,7 @@ export const STATIONS = [
   // Bendoorwell
   { id: 'attil-restaurant', name: 'Attil Restaurant', area: 'Bendoorwell', lat: 12.8705436, lng: 74.8570234 },
   { id: 'royal-treat-family-restaurant', name: 'Royal Treat Family Restaurant', area: 'Bendoorwell', lat: 12.8713261, lng: 74.8569875 },
+  { id: 'ss-mini-mart', name: 'S S Mini Mart', area: 'Bendoorwell', lat: 12.8712653, lng: 74.8568484 },
   { id: 'colaco-canteen', name: 'Colaco Canteen, Colaco Hospital', area: 'Bendoorwell', lat: 12.8726162, lng: 74.8562855 },
   { id: 'super-foodmart-bendoor', name: 'Super FoodMart Bendoor', area: 'Bendoorwell', lat: 12.8728659, lng: 74.8560209 },
 
@@ -82,6 +83,9 @@ export const STATIONS = [
   { id: 'lifeline-healthcare-cafe', name: 'Lifeline Healthcare Cafe', area: 'Falnir', lat: 12.8676343, lng: 74.8531419 },
 
   // Balmatta
+  // One of three Helen's Bakery branches (with Farangipete and Derlakatte, 8–11 km
+  // apart) — branches, not repeats. The area line tells the rows apart.
+  { id: 'helens-bakery-balmatta', name: 'HELEN’s Bakery', area: 'Balmatta', lat: 12.8719118, lng: 74.8544411 },
   { id: 'hok-house-of-koobideh', name: 'HOK House Of Koobideh', area: 'Balmatta', lat: 12.8737010, lng: 74.8528626 },
   { id: 'hotel-mangalore-donne-biryani', name: 'Hotel Mangalore Donne Biryani', area: 'Balmatta', lat: 12.8731947, lng: 74.8512563 },
 
@@ -108,8 +112,54 @@ export const STATIONS = [
   { id: 'mm-cake-paradise', name: 'M M Cake Paradise', area: 'Opp Milagris Church, Hampankatte', lat: 12.8678376, lng: 74.8439895 },
   { id: 'sattvva-cafe', name: 'Sattvva Cafe', area: 'Hampankatte', lat: 12.869135, lng: 74.840135 },
 
+  // KS Rao Rd
+  { id: 'feel-laban-city-center', name: 'Feel Laban, City Center', area: 'KS Rao Rd', lat: 12.8711097, lng: 74.8421210 },
+
   // Kodialbail
   { id: 'arogya-fruits-and-juice-centre', name: 'Arogya Fruits and Juice Centre', area: 'Kodialbail', lat: 12.873331, lng: 74.841401 },
+
+  // Farangipete — ~9.3 km east of MAP_CENTER, half a kilometre inside the 10 km
+  // NEARBY_KM cut in stations.js. An outlet much further east falls outside the
+  // no-location frame while these stay in it.
+  { id: 'sulthan-mandi-kuzhi', name: 'Sulthan Mandi Kuzhi', area: 'Farangipete', lat: 12.8720353, lng: 74.9597309 },
+  // Not Super FoodMart Bendoor — 11 km away. A branch, not a repeat.
+  { id: 'super-food-mart-farangipete', name: 'Super Food mart', area: 'Farangipete', lat: 12.8733486, lng: 74.9586352 },
+  { id: 'ayisha-store', name: 'Ayisha store', area: 'Farangipete', lat: 12.8738977, lng: 74.9584863 },
+  { id: 'arab-inn-restaurant', name: 'ARAB INN RESTAURANT', area: 'Farangipete', lat: 12.8737281, lng: 74.9583968 },
+  { id: 'yemen-kuzhi-mandi', name: 'Yemen kuzhi mandi', area: 'Farangipete', lat: 12.8740010, lng: 74.9580149 },
+  { id: 'js-bakery', name: 'J S BAKERY', area: 'Farangipete', lat: 12.8742161, lng: 74.9572887 },
+  { id: 'helens-bakery-farangipete', name: 'HELEN’s Bakery', area: 'Farangipete', lat: 12.8746011, lng: 74.9570084 },
+  { id: 'the-wrap', name: 'The WRAP', area: 'Farangipete', lat: 12.8742252, lng: 74.9566779 },
+
+  // Jalalbagh
+  { id: 'royal-bakes', name: 'Royal Bakes', area: 'Jalalbagh', lat: 12.8063628, lng: 74.8976324 },
+
+  // Derlakatte
+  { id: '7bakes', name: '7Bakes', area: 'Derlakatte', lat: 12.8082642, lng: 74.8950440 },
+  { id: 'al-ain-super-mart', name: 'Al Ain Super Mart', area: 'Derlakatte', lat: 12.8084398, lng: 74.8946441 },
+  { id: 'new-bangalore-ayyengar-bakery', name: 'New Bangalore Ayyengar Bakery', area: 'Derlakatte', lat: 12.8087367, lng: 74.8939393 },
+  { id: 'helens-bakery-derlakatte', name: 'Helen’s Bakery', area: 'Derlakatte', lat: 12.8093248, lng: 74.8912849 },
+  { id: 'hm-book-hive', name: 'HM book Hive', area: 'Derlakatte', lat: 12.8095824, lng: 74.8902191 },
+  { id: 'zooq-barbequz-golden-spoon', name: 'ZOOQ BARBEQUZ, Golden Spoon', area: 'Derlakatte', lat: 12.8098077, lng: 74.8876891 },
+  // X P Gaming Cafe and Cloud Craft are 4.3 m apart — inside COINCIDENT_M, so they
+  // share one pin and the list names both.
+  { id: 'xp-gaming-cafe', name: 'X P GAMING CAFE', area: 'Derlakatte', lat: 12.8107927, lng: 74.8844175 },
+  { id: 'cloud-craft', name: 'Cloud Craft', area: 'Derlakatte', lat: 12.8108110, lng: 74.8843829 },
+  // Not Ganesh Stores in Naguri — 6.6 km away. A branch, not a repeat.
+  { id: 'ganesh-store-derlakatte', name: 'Ganesh store', area: 'Derlakatte', lat: 12.8110618, lng: 74.8829211 },
+  { id: 'spicy-kitchen', name: 'Spicy Kitchen', area: 'Derlakatte', lat: 12.8109601, lng: 74.8827713 },
+  { id: 'cakezy', name: 'Cakezy', area: 'Derlakatte', lat: 12.8110775, lng: 74.8827045 },
+  { id: 'hotel-aurelia-comforts', name: 'Hotel Aurelia Comforts', area: 'Derlakatte', lat: 12.8143373, lng: 74.8804615 },
+
+  // Babbukatte
+  { id: 'lm-general-store', name: 'L M GENERAL STORE', area: 'Babbukatte', lat: 12.8192401, lng: 74.8672208 },
+
+  // Kallapu – Thokkotu
+  { id: 'hot-banana-chips', name: 'Hot Banana Chips', area: 'Kallapu', lat: 12.8318514, lng: 74.8604496 },
+  { id: 'aishwarya-bakery', name: 'Aishwarya Bakery', area: 'Kallapu', lat: 12.8249206, lng: 74.8601073 },
+  { id: 'new-super-bakery', name: 'New Super Bakery', area: 'Kallapu', lat: 12.8239523, lng: 74.8600952 },
+  { id: 'no1-bakery', name: 'No.1 Bakery', area: 'Thokkotu', lat: 12.8186353, lng: 74.8593754 },
+  { id: 'grocers-supermarket', name: 'Grocer’s Supermarket', area: 'Kallapu', lat: 12.8195046, lng: 74.8588483 },
 ];
 
 /* The view before location is known or anything selected: the centre of the
